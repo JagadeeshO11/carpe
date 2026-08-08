@@ -1,0 +1,15 @@
+# Dependencies & Builds
+node_modules/
+dist/
+dist-ssr/
+.kombai/
+
+# Logs & temp
+*.log
+logs/
+.DS_Store
+
+# IDE & OS
+.vscode/
+.idea/
+*.local
