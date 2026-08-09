@@ -81,6 +81,8 @@ export default function MainAppShell({ activeTab, onTabChange, mode, onModeToggl
           <UserCheck size={18} strokeWidth={activeTab === 'profile' ? 2.5 : 1.8} />
           <span>Profile</span>
         </button>
+
+        {/* Admin tab intentionally removed from bottom nav; access via Profile -> Admin Panel */}
       </nav>
     </div>
   )

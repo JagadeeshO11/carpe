@@ -1,7 +1,7 @@
 import PrimaryButton from '../components/PrimaryButton'
 import WelcomeIllustration from '../components/WelcomeIllustration'
 
-export default function WelcomeScreen({ onNext, onExploreApp }) {
+export default function WelcomeScreen({ onNext, onExploreApp, onOpenAdmin }) {
   return (
     <section className="flex min-h-full flex-col px-5 pb-8 text-center">
       <div className="pt-24">
@@ -28,6 +28,10 @@ export default function WelcomeScreen({ onNext, onExploreApp }) {
           </button>
           <p className="mt-3 text-[11px] text-[#817b84]">
             Already have an account? <button type="button" onClick={onExploreApp} className="font-bold text-brand-purple hover:text-brand-purple-dark">Login</button>
+          </p>
+
+          <p className="mt-2 text-[10px] text-[#a29ca6]">
+            <button type="button" onClick={onOpenAdmin} className="font-semibold text-brand-purple hover:underline">Admin Panel</button>
           </p>
         </div>
       </div>

@@ -18,6 +18,7 @@ import FindRidesScreen from './screens/FindRidesScreen'
 import OfferRideScreen from './screens/OfferRideScreen'
 import LivePoolMapScreen from './screens/LivePoolMapScreen'
 import ProfileScreen from './screens/ProfileScreen'
+import AdminDashboard from './screens/AdminDashboard'
 
 const screenComponents = {
   welcome: WelcomeScreen,
@@ -133,12 +134,15 @@ function App() {
           {activeTab === 'live' && (
             <LivePoolMapScreen bookings={bookings} />
           )}
-
+          {activeTab === 'admin' && (
+            <AdminDashboard />
+          )}
           {activeTab === 'profile' && (
             <ProfileScreen
               formData={formData}
               onGoToOnboarding={() => setCurrentScreen('welcome')}
               onEmergencySos={() => {}}
+              onOpenAdmin={() => setActiveTab('admin')}
             />
           )}
         </MainAppShell>
@@ -161,6 +165,7 @@ function App() {
         onContactAdd={addContact}
         onContactChange={updateContact}
         onUpload={handleUpload}
+        onOpenAdmin={() => { setCurrentScreen('mainApp'); setActiveTab('admin') }}
       />
     </MobileShell>
   )

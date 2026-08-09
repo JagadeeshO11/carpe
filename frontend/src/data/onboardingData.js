@@ -35,11 +35,25 @@ export const DRIVER_OPTIONS = Object.freeze([
   },
 ])
 
+export const VEHICLE_TYPE_OPTIONS = Object.freeze([
+  { value: '', label: 'Select vehicle type' },
+  { value: 'sedan', label: 'Sedan' },
+  { value: 'hatchback', label: 'Hatchback' },
+  { value: 'suv', label: 'Compact SUV' },
+  { value: 'mpv', label: 'MPV / Large SUV (Innova / Ertiga)' },
+])
+
+export const FUEL_TYPE_OPTIONS = Object.freeze([
+  { value: '', label: 'Select fuel type' },
+  { value: 'petrol', label: 'Petrol' },
+  { value: 'diesel', label: 'Diesel' },
+  { value: 'cng', label: 'CNG' },
+  { value: 'electric', label: 'Electric' },
+])
+
 export const VEHICLE_FIELDS = Object.freeze([
-  { name: 'vehicleModel', label: 'Vehicle Model', placeholder: 'Select model', options: ['Select model', 'Maruti Swift', 'Hyundai i20', 'Tata Nexon'] },
-  { name: 'vehicleColor', label: 'Vehicle Color', placeholder: 'Select color', options: ['Select color', 'Purple', 'White', 'Black'] },
-  { name: 'seatingCapacity', label: 'Seating Capacity', placeholder: '4 Seats', options: ['4 Seats', '5 Seats', '7 Seats'] },
-  { name: 'luggageCapacity', label: 'Luggage Capacity (Approx.)', placeholder: '2 Bags', options: ['2 Bags', '3 Bags', '4 Bags'] },
+  { name: 'vehicleModel', label: 'Vehicle Model', placeholder: 'e.g. Tata Nexon', type: 'text' },
+  { name: 'vehicleColor', label: 'Vehicle Color', placeholder: 'e.g. White', type: 'text' },
 ])
 
 export const PHOTO_SLOTS = Object.freeze([
@@ -47,12 +61,31 @@ export const PHOTO_SLOTS = Object.freeze([
   { key: 'back', label: 'Back View' },
   { key: 'left', label: 'Left Side View' },
   { key: 'right', label: 'Right Side View' },
+  { key: 'dashboard', label: 'Dashboard' },
+  { key: 'frontSeats', label: 'Front Seats' },
+  { key: 'rearSeats', label: 'Rear Seats' },
+  { key: 'boot', label: 'Boot Space' },
 ])
 
 export const CONTACT_PHONE_NUMBERS = Object.freeze([
   '+91 98765 43210',
   '+91 98765 43211',
   '+91 98765 43212',
+])
+
+export const DRIVER_VERIFICATION_STATUS = Object.freeze({
+  PENDING: 'PENDING',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED',
+})
+
+export const PASSENGER_CONDUCT_RULES = Object.freeze([
+  'No loud music or videos without earphones.',
+  'Use earphones for personal audio at all times.',
+  'Respect fellow passengers and the driver.',
+  'Follow driver safety instructions.',
+  'No smoking or eating without driver\'s permission.',
+  'Keep the vehicle clean. Carry your waste.',
 ])
 
 export const createInitialFormState = () => ({
@@ -63,11 +96,17 @@ export const createInitialFormState = () => ({
   dateOfBirth: '',
   gender: '',
   driverIntent: 'yes',
+  // Vehicle registration
   vehicleNumber: 'KA 01 AB 1234',
   vehicleModel: '',
   vehicleColor: '',
+  vehicleType: '',
+  fuelType: '',
+  rcDetails: '',
   seatingCapacity: '4 Seats',
   luggageCapacity: '2 Bags',
+  // Driver verification status
+  driverVerificationStatus: 'PENDING',
   contacts: CONTACT_PHONE_NUMBERS.map((phone) => ({ name: 'Contact Name', phone })),
   uploads: {
     licenceFront: null,
@@ -76,5 +115,9 @@ export const createInitialFormState = () => ({
     back: null,
     left: null,
     right: null,
+    dashboard: null,
+    frontSeats: null,
+    rearSeats: null,
+    boot: null,
   },
 })
