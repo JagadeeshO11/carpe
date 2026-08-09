@@ -1,6 +1,6 @@
 import { Car, Search, Navigation, UserCheck, ShieldAlert, ChevronLeft } from 'lucide-react'
 
-export default function MainAppShell({ activeTab, onTabChange, mode, onModeToggle, children, onEmergencySos, hideChrome = false }) {
+export default function MainAppShell({ activeTab, onTabChange, mode, children, onEmergencySos, onAdminBack, hideChrome = false }) {
   return (
     <div className="flex h-full flex-col bg-[#fdfcff]">
       {/* Top Header */}
@@ -15,20 +15,7 @@ export default function MainAppShell({ activeTab, onTabChange, mode, onModeToggl
             </span>
           </div>
 
-          {/* Mode Switcher Toggle */}
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onModeToggle}
-              className="flex items-center gap-1.5 rounded-full border border-brand-purple/20 bg-brand-lavender px-2.5 py-1 transition hover:bg-brand-lavender-strong"
-              title={`Switch to ${mode === 'passenger' ? 'Driver' : 'Passenger'} Mode`}
-            >
-              <span className={`h-2 w-2 rounded-full ${mode === 'passenger' ? 'bg-brand-purple' : 'bg-brand-green'}`} />
-              <span className="text-[10px] font-bold text-[#312b35]">
-                {mode === 'passenger' ? 'Passenger View' : 'Driver View'}
-              </span>
-            </button>
-
             <button
               type="button"
               onClick={onEmergencySos}
@@ -44,7 +31,7 @@ export default function MainAppShell({ activeTab, onTabChange, mode, onModeToggl
       {/* Admin compact header when chrome is hidden */}
       {hideChrome && (
         <div className="flex items-center gap-3 border-b border-[#eee] bg-white px-3 py-2">
-          <button type="button" onClick={() => onTabChange('profile')} className="flex items-center gap-2 text-[13px] font-semibold text-brand-purple">
+          <button type="button" onClick={onAdminBack || (() => onTabChange('profile'))} className="flex items-center gap-2 text-[13px] font-semibold text-brand-purple">
             <ChevronLeft size={18} /> Back
           </button>
           <div className="flex-1 text-center text-[13px] font-bold">Admin Panel</div>

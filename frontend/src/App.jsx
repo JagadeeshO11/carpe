@@ -1,18 +1,22 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import MobileShell from './components/MobileShell'
 import MainAppShell from './components/MainAppShell'
 import { createInitialFormState, SCREEN_ORDER } from './data/onboardingData'
+import { formatAdminLoginPath, formatAuthPath, formatMainAppPath, formatOnboardingPath } from './routing/appRoutes'
+import useAppRouter from './routing/useAppRouter'
 import { MOCK_RIDES, MOCK_USER_BOOKINGS } from './data/carpoolData'
 
-import WelcomeScreen from './screens/WelcomeScreen'
+import RoleSelectionScreen from './screens/RoleSelectionScreen'
+import DriverIntroScreen from './screens/DriverIntroScreen'
+import PassengerAuthScreen from './screens/PassengerAuthScreen'
+import DriverAuthScreen from './screens/DriverAuthScreen'
+import AdminLoginScreen from './screens/AdminLoginScreen'
 import RegisterScreen from './screens/RegisterScreen'
 import VerifyOtpScreen from './screens/VerifyOtpScreen'
 import PersonalDetailsScreen from './screens/PersonalDetailsScreen'
-import TrustedContactsScreen from './screens/TrustedContactsScreen'
-import BecomeDriverScreen from './screens/BecomeDriverScreen'
-import DrivingLicenceScreen from './screens/DrivingLicenceScreen'
-import VehicleDetailsScreen from './screens/VehicleDetailsScreen'
-import VehiclePhotosScreen from './screens/VehiclePhotosScreen'
+import ContactInfoScreen from './screens/ContactInfoScreen'
+import CompletionScreen from './screens/CompletionScreen'
+import RouteNotFoundScreen from './screens/RouteNotFoundScreen'
 
 import FindRidesScreen from './screens/FindRidesScreen'
 import OfferRideScreen from './screens/OfferRideScreen'
@@ -21,56 +25,238 @@ import ProfileScreen from './screens/ProfileScreen'
 import AdminDashboard from './screens/AdminDashboard'
 
 const screenComponents = {
-  welcome: WelcomeScreen,
+  roleSelect: RoleSelectionScreen,
+  driverIntro: DriverIntroScreen,
   register: RegisterScreen,
   verifyOtp: VerifyOtpScreen,
-  personalDetails: PersonalDetailsScreen,
-  trustedContacts: TrustedContactsScreen,
-  becomeDriver: BecomeDriverScreen,
-  drivingLicence: DrivingLicenceScreen,
-  vehicleDetails: VehicleDetailsScreen,
-  vehiclePhotos: VehiclePhotosScreen,
+  aadhaarEkyc: PersonalDetailsScreen,
+  contactInfo: ContactInfoScreen,
+  complete: CompletionScreen,
+  adminLogin: AdminLoginScreen,
 }
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState('welcome')
-  const [formData, setFormData] = useState(createInitialFormState)
+  const { route, navigate } = useAppRouter()
+  const [formData, setFormData] = useState(() => {
+    const initialState = createInitialFormState()
+    try {
+      const savedRole = window.sessionStorage.getItem('carpe:selected-role')
+      return savedRole === 'passenger' || savedRole === 'driver'
+        ? { ...initialState, selectedRole: savedRole }
+        : initialState
+    } catch {
+      return initialState
+    }
+  })
+  const [flowError, setFlowError] = useState('')
+  const [authenticatedRole, setAuthenticatedRole] = useState(() => {
+    try {
+      const savedRole = window.sessionStorage.getItem('carpe:authenticated-role')
+      return savedRole === 'passenger' || savedRole === 'driver' ? savedRole : null
+    } catch {
+      return null
+    }
+  })
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
+    try { return window.sessionStorage.getItem('carpe:admin-authenticated') === 'true' } catch { return false }
+  })
 
-  // Main Carpool App State
-  const [appMode, setAppMode] = useState('passenger') // 'passenger' | 'driver'
-  const [activeTab, setActiveTab] = useState('find') // 'find' | 'offer' | 'live' | 'profile'
+  useEffect(() => {
+    try {
+      if (formData.selectedRole) {
+        window.sessionStorage.setItem('carpe:selected-role', formData.selectedRole)
+      } else {
+        window.sessionStorage.removeItem('carpe:selected-role')
+      }
+    } catch {
+      // Session storage is optional in private browsing and test environments.
+    }
+  }, [formData.selectedRole])
+
+  useEffect(() => {
+    if (route.kind !== 'onboarding' || !route.role) return
+    setFormData((previous) => ({
+      ...previous,
+      selectedRole: route.role,
+      registrationMode: route.registrationMode || previous.registrationMode,
+    }))
+  }, [route.kind, route.role, route.registrationMode])
+
+  useEffect(() => {
+    if ((route.kind !== 'app' && route.kind !== 'ride')) return
+    if (route.tab === 'admin') {
+      if (!isAdminAuthenticated) navigate(formatAdminLoginPath(), { replace: true })
+      return
+    }
+    if (!authenticatedRole) {
+      navigate(formatAuthPath(route.mode, 'login'), { replace: true })
+      return
+    }
+    if (route.mode !== authenticatedRole) {
+      navigate(formatMainAppPath(authenticatedRole, authenticatedRole === 'driver' ? 'offer' : 'find'), { replace: true })
+    }
+  }, [authenticatedRole, isAdminAuthenticated, navigate, route.kind, route.mode, route.tab])
+
   const [rides, setRides] = useState(MOCK_RIDES)
   const [bookings, setBookings] = useState(MOCK_USER_BOOKINGS)
 
+  const currentScreen = route.kind === 'onboarding' ? route.screen : route.kind === 'notFound' ? 'notFound' : 'mainApp'
+  const appMode = route.mode || 'passenger'
+  const activeTab = route.tab || (appMode === 'driver' ? 'offer' : 'find')
   const currentIndex = SCREEN_ORDER.indexOf(currentScreen)
 
+  const handleRoleSelect = (role) => {
+    if (role !== 'passenger' && role !== 'driver') return
+    setFlowError('')
+    setFormData((previous) => ({ ...previous, selectedRole: role }))
+    navigate(formatAuthPath(role, role === 'driver' ? 'driverIntro' : 'login'))
+  }
+
+  const handleDriverIntroContinue = () => {
+    setFlowError('')
+    setFormData((previous) => ({ ...previous, selectedRole: 'driver' }))
+    navigate(formatAuthPath('driver', 'login'))
+  }
+
   const goNext = () => {
-    if (currentIndex === SCREEN_ORDER.length - 1 || (currentScreen === 'becomeDriver' && formData.driverIntent === 'no')) {
-      setCurrentScreen('mainApp')
-      setActiveTab(appMode === 'driver' ? 'offer' : 'find')
-    } else {
-      setCurrentScreen(SCREEN_ORDER[Math.min(currentIndex + 1, SCREEN_ORDER.length - 1)])
+    const phoneDigits = formData.phone.replace(/\D/g, '')
+    const isDriver = formData.selectedRole === 'driver'
+    const otpComplete = formData.otp.every(Boolean)
+    const aadhaarDigits = formData.aadhaarNumber.replace(/\D/g, '')
+    const emailIsValid = !formData.email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+
+    if (currentScreen === 'roleSelect') {
+      handleRoleSelect(formData.selectedRole || 'passenger')
+      return
     }
+
+    if (currentScreen === 'driverIntro') {
+      handleDriverIntroContinue()
+      return
+    }
+
+    if (currentScreen === 'welcome') {
+      if (phoneDigits.length !== 10) {
+        setFlowError('Enter a valid 10-digit mobile number to continue.')
+        return
+      }
+
+      setFlowError('')
+      // Both Login and Register share one OTP verification screen.
+      // Register no longer stops on a second mobile-number step.
+      navigate(formatAuthPath(formData.selectedRole, 'verifyOtp'))
+      return
+    }
+
+    if (currentScreen === 'register' && phoneDigits.length !== 10) {
+      setFlowError('Enter a valid 10-digit mobile number to continue.')
+      return
+    }
+
+    if (currentScreen === 'verifyOtp' && !otpComplete) {
+      setFlowError('Enter all 6 digits from the OTP sent to your mobile number.')
+      return
+    }
+
+    if (currentScreen === 'verifyOtp' && !isDriver) {
+      setFlowError('')
+      setAuthenticatedRole('passenger')
+      try { window.sessionStorage.setItem('carpe:authenticated-role', 'passenger') } catch {}
+      navigate(formatMainAppPath('passenger', 'find'))
+      return
+    }
+
+    if (currentScreen === 'aadhaarEkyc' && aadhaarDigits.length !== 12) {
+      setFlowError('Enter a valid 12-digit Aadhaar number to continue.')
+      return
+    }
+
+    if (currentScreen === 'contactInfo' && !emailIsValid) {
+      setFlowError('Enter a valid email address or leave this field blank.')
+      return
+    }
+
+    setFlowError('')
+
+    if (currentScreen === 'contactInfo') {
+      if (!isDriver) {
+        navigate(formatMainAppPath('passenger', 'find'))
+        return
+      }
+      setFormData((previous) => ({
+        ...previous,
+        verificationStatus: 'verified',
+        completionViewed: false,
+      }))
+      navigate(formatAuthPath('driver', 'complete'))
+      return
+    }
+
+    if (currentScreen === 'complete') {
+      const completedMode = formData.selectedRole === 'driver' ? 'driver' : 'passenger'
+      setFormData((previous) => ({ ...previous, completionViewed: true }))
+      setAuthenticatedRole(completedMode)
+      try { window.sessionStorage.setItem('carpe:authenticated-role', completedMode) } catch {}
+      navigate(formatMainAppPath(completedMode, completedMode === 'driver' ? 'offer' : 'find'))
+      return
+    }
+
+    const nextScreen = SCREEN_ORDER[Math.min(currentIndex + 1, SCREEN_ORDER.length - 1)]
+    navigate(formData.selectedRole ? formatAuthPath(formData.selectedRole, nextScreen) : formatOnboardingPath(nextScreen))
   }
 
   const goBack = () => {
     if (currentScreen === 'mainApp') {
-      setCurrentScreen('welcome')
-    } else {
-      setCurrentScreen(SCREEN_ORDER[Math.max(currentIndex - 1, 0)])
+      navigate('/')
+      return
     }
+
+    if (currentScreen === 'notFound') {
+      navigate('/')
+      return
+    }
+
+    if (currentScreen === 'driverIntro') {
+      navigate('/')
+      return
+    }
+
+    if (currentScreen === 'welcome') {
+      navigate(formData.selectedRole === 'driver' ? formatAuthPath('driver', 'driverIntro') : '/')
+      return
+    }
+
+    if (currentScreen === 'verifyOtp' && formData.selectedRole === 'passenger') {
+      navigate(formatAuthPath('passenger', 'login'))
+      return
+    }
+
+    const previousScreen = SCREEN_ORDER[Math.max(currentIndex - 1, 0)]
+    navigate(formData.selectedRole ? formatAuthPath(formData.selectedRole, previousScreen) : formatOnboardingPath(previousScreen))
+  }
+
+  const setActiveTab = (tab) => {
+    navigate(formatMainAppPath(appMode, tab))
   }
 
   const exploreMainApp = () => {
-    setCurrentScreen('mainApp')
-    setActiveTab(appMode === 'driver' ? 'offer' : 'find')
+    navigate(formatMainAppPath(appMode, appMode === 'driver' ? 'offer' : 'find'))
   }
 
   const updateField = (field, value) => {
+    setFlowError('')
     setFormData((previous) => ({ ...previous, [field]: value }))
   }
 
+  const setRegistrationMode = (registrationMode) => {
+    updateField('registrationMode', registrationMode)
+    if (formData.selectedRole === 'driver') {
+      navigate(formatAuthPath('driver', registrationMode))
+    }
+  }
+
   const updateOtp = (index, value) => {
+    setFlowError('')
     setFormData((previous) => {
       const otp = [...previous.otp]
       otp[index] = value
@@ -78,64 +264,49 @@ function App() {
     })
   }
 
-  const addContact = () => {
-    setFormData((previous) => ({
-      ...previous,
-      contacts: [...previous.contacts, { name: 'New Contact', phone: '+91 98765 43213' }],
-    }))
-  }
-
-  const updateContact = (index, field, value) => {
-    setFormData((previous) => ({
-      ...previous,
-      contacts: previous.contacts.map((contact, contactIndex) => (
-        contactIndex === index ? { ...contact, [field]: value } : contact
-      )),
-    }))
-  }
-
-  const handleUpload = (slot, file) => {
-    setFormData((previous) => ({
-      ...previous,
-      uploads: { ...previous.uploads, [slot]: file },
-    }))
-  }
-
   const handlePublishRide = (newRide) => {
-    setRides((prev) => [newRide, ...prev])
+    setRides((previous) => [newRide, ...previous])
     setActiveTab('live')
   }
 
   const handleBookRide = (newBooking) => {
-    setBookings((prev) => [newBooking, ...prev])
-    // If booking included a specific seat, mark that seat occupied on the ride
+    setBookings((previous) => [newBooking, ...previous])
     if (newBooking.seatId) {
-      setRides((prev) => prev.map((r) => {
-        if (r.id !== newBooking.rideId) return r
-        const seatsOccupied = [...(r.seatsOccupied || []), newBooking.seatId]
-        const seatsAvailable = Math.max(0, (r.seatsTotal || r.seatsAvailable || 0) - seatsOccupied.length)
-        return { ...r, seatsOccupied, seatsAvailable }
+      setRides((previous) => previous.map((ride) => {
+        if (ride.id !== newBooking.rideId) return ride
+        const seatsOccupied = [...(ride.seatsOccupied || []), newBooking.seatId]
+        const seatsAvailable = Math.max(0, (ride.seatsTotal || ride.seatsAvailable || 0) - seatsOccupied.length)
+        return { ...ride, seatsOccupied, seatsAvailable }
       }))
     } else {
-      // fallback: decrement seatsAvailable by booked seats count
-      setRides((prev) => prev.map((r) => r.id === newBooking.rideId ? { ...r, seatsAvailable: Math.max(0, (r.seatsAvailable || 0) - (newBooking.seatsBooked || 1)) } : r))
+      setRides((previous) => previous.map((ride) => (
+        ride.id === newBooking.rideId
+          ? { ...ride, seatsAvailable: Math.max(0, (ride.seatsAvailable || 0) - (newBooking.seatsBooked || 1)) }
+          : ride
+      )))
     }
   }
 
-  const toggleMode = () => {
-    setAppMode((prev) => {
-      const next = prev === 'passenger' ? 'driver' : 'passenger'
-      setActiveTab(next === 'driver' ? 'offer' : 'find')
-      return next
-    })
-  }
-
   const chooseRole = (role) => {
-    setAppMode(role)
-    setActiveTab(role === 'driver' ? 'offer' : 'find')
+    handleRoleSelect(role)
   }
 
-  // Render Main Carpool App when onboarding is complete or exploring prototype
+  const handleAdminLogin = (username, password) => {
+    if (username !== 'admin' || password !== 'admin123') return false
+    setIsAdminAuthenticated(true)
+    try { window.sessionStorage.setItem('carpe:admin-authenticated', 'true') } catch {}
+    navigate('/app/admin')
+    return true
+  }
+
+  if (route.kind === 'notFound') {
+    return (
+      <MobileShell>
+        <RouteNotFoundScreen pathname={route.pathname} onGoHome={() => navigate('/')} />
+      </MobileShell>
+    )
+  }
+
   if (currentScreen === 'mainApp') {
     return (
       <MobileShell>
@@ -143,30 +314,25 @@ function App() {
           activeTab={activeTab}
           onTabChange={setActiveTab}
           mode={appMode}
-          onModeToggle={toggleMode}
           onEmergencySos={() => setActiveTab('profile')}
+          onAdminBack={() => navigate('/')}
           hideChrome={activeTab === 'admin'}
         >
           {activeTab === 'find' && (
-            <FindRidesScreen rides={rides} onBookRide={handleBookRide} />
+            <FindRidesScreen
+              rides={rides}
+              onBookRide={handleBookRide}
+              initialRideId={route.kind === 'ride' ? route.rideId : undefined}
+            />
           )}
-
-          {activeTab === 'offer' && (
-            <OfferRideScreen formData={formData} onPublishRide={handlePublishRide} />
-          )}
-
-          {activeTab === 'live' && (
-            <LivePoolMapScreen bookings={bookings} />
-          )}
-          {activeTab === 'admin' && (
-            <AdminDashboard />
-          )}
+          {activeTab === 'offer' && <OfferRideScreen formData={formData} onPublishRide={handlePublishRide} />}
+          {activeTab === 'live' && <LivePoolMapScreen bookings={bookings} />}
+          {activeTab === 'admin' && <AdminDashboard />}
           {activeTab === 'profile' && (
             <ProfileScreen
               formData={formData}
-              onGoToOnboarding={() => setCurrentScreen('welcome')}
+              onGoToOnboarding={() => navigate(formatAuthPath(appMode, 'login'))}
               onEmergencySos={() => {}}
-              onOpenAdmin={() => setActiveTab('admin')}
             />
           )}
         </MainAppShell>
@@ -174,8 +340,9 @@ function App() {
     )
   }
 
-  // Render Onboarding Flow
-  const ScreenComponent = screenComponents[currentScreen]
+  const ScreenComponent = currentScreen === 'welcome'
+    ? (formData.selectedRole === 'driver' ? DriverAuthScreen : PassengerAuthScreen)
+    : screenComponents[currentScreen]
 
   return (
     <MobileShell>
@@ -185,12 +352,14 @@ function App() {
         onNext={goNext}
         onExploreApp={exploreMainApp}
         onChooseRole={chooseRole}
+        onSelectRole={handleRoleSelect}
         onFieldChange={updateField}
+        onRegistrationModeChange={setRegistrationMode}
         onOtpChange={updateOtp}
-        onContactAdd={addContact}
-        onContactChange={updateContact}
-        onUpload={handleUpload}
-        onOpenAdmin={() => { setCurrentScreen('mainApp'); setActiveTab('admin') }}
+        error={flowError}
+        onComplete={goNext}
+        onOpenAdmin={() => navigate(formatAdminLoginPath())}
+        onAdminLogin={handleAdminLogin}
       />
     </MobileShell>
   )

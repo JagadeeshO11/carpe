@@ -1,55 +1,90 @@
-import PrimaryButton from '../components/PrimaryButton'
-import WelcomeIllustration from '../components/WelcomeIllustration'
+import { ArrowRight, CheckCircle2, ChevronDown, Chrome, Mail, Phone, ShieldCheck, UserRound, UserRoundPlus } from 'lucide-react'
+import RegistrationFeatureGrid from '../components/RegistrationFeatureGrid'
+import RegistrationLayout from '../components/RegistrationLayout'
 
-export default function WelcomeScreen({ onNext, onExploreApp, onOpenAdmin, onChooseRole }) {
+export default function WelcomeScreen({ formData, onNext, onOpenAdmin, onFieldChange, onRegistrationModeChange, error }) {
+  const registrationMode = formData.registrationMode || 'login'
+
   return (
-    <section className="flex min-h-full flex-col px-5 pb-8 text-center">
-      <div className="pt-24">
-        <div className="text-[50px] font-extrabold leading-none tracking-[-0.08em] text-brand-purple">
-          Car<span className="text-brand-green">Pe</span>
-        </div>
-        <p className="mt-6 text-[16px] leading-[1.55] text-[#2d2731]">
-          Intercity Rides.<br />
-          <strong>Trusted People.</strong><br />
-          <strong>Better Journeys.</strong>
-        </p>
-      </div>
+    <RegistrationLayout showBack={false} showProgress={false} className="registration-screen--welcome">
+      <div className="registration-welcome">
+        <h1 className="registration-welcome__title">Welcome Back! <span aria-hidden="true">👋</span></h1>
+        <p className="registration-welcome__subtitle">Secure access to your digital sale agreements.</p>
 
-      <div className="mt-auto">
-        <WelcomeIllustration />
-        <div className="mt-3 space-y-2">
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => { onChooseRole && onChooseRole('passenger'); onNext() }}
-              className="w-full rounded-control bg-brand-lavender py-2.5 text-[11px] font-bold text-brand-purple"
-            >
-              I'm a Passenger
-            </button>
-            <button
-              type="button"
-              onClick={() => { onChooseRole && onChooseRole('driver'); onNext() }}
-              className="w-full rounded-control border border-brand-purple/40 bg-white py-2.5 text-[11px] font-bold text-brand-purple hover:bg-brand-lavender-very-light"
-            >
-              I'm a Driver
-            </button>
-          </div>
+        <div className="registration-mode" role="tablist" aria-label="Registration mode">
           <button
             type="button"
-            onClick={() => { onChooseRole && onChooseRole('passenger'); onExploreApp() }}
-            className="w-full rounded-control border border-brand-purple/40 bg-brand-lavender py-2.5 text-[11px] font-bold text-brand-purple hover:bg-brand-lavender-strong transition"
+            role="tab"
+            aria-selected={registrationMode === 'login'}
+            onClick={() => (onRegistrationModeChange || onFieldChange)('login')}
+            className={`registration-mode__button ${registrationMode === 'login' ? 'registration-mode__button--active' : ''}`}
           >
-            Explore Carpool Prototype
+            <span className="registration-mode__button-content"><UserRound aria-hidden="true" size={20} /> Login</span>
           </button>
-          <p className="mt-3 text-[11px] text-[#817b84]">
-            Already have an account? <button type="button" onClick={onExploreApp} className="font-bold text-brand-purple hover:text-brand-purple-dark">Login</button>
-          </p>
-
-          <p className="mt-2 text-[10px] text-[#a29ca6]">
-            <button type="button" onClick={onOpenAdmin} className="font-semibold text-brand-purple hover:underline">Admin Panel</button>
-          </p>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={registrationMode === 'register'}
+            onClick={() => (onRegistrationModeChange || onFieldChange)('register')}
+            className={`registration-mode__button ${registrationMode === 'register' ? 'registration-mode__button--active' : ''}`}
+          >
+            <span className="registration-mode__button-content"><UserRoundPlus aria-hidden="true" size={20} /> Register</span>
+          </button>
         </div>
+
+        <div className="registration-entry-field">
+          <label htmlFor="entry-phone" className="registration-field-label">Mobile Number</label>
+          <div className="registration-phone-field">
+            <button type="button" className="registration-country-code" aria-label="Country code India">
+              +91 <ChevronDown aria-hidden="true" size={18} strokeWidth={2.2} />
+            </button>
+            <Phone aria-hidden="true" size={26} strokeWidth={2.1} className="registration-phone-icon" />
+            <input
+              id="entry-phone"
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel"
+              value={formData.phone}
+              onChange={(event) => onFieldChange('phone', event.target.value)}
+              placeholder="Enter mobile number"
+              className="registration-input"
+            />
+          </div>
+          {error && <p className="registration-error" role="alert">{error}</p>}
+        </div>
+
+        <button type="button" onClick={onNext} className="registration-action registration-entry-action">
+          <span>Send OTP</span>
+          <ArrowRight aria-hidden="true" size={27} strokeWidth={2.6} />
+        </button>
+
+        <div className="registration-divider"><span>or continue with</span></div>
+        <div className="registration-alternatives">
+          <button type="button" className="registration-alternative" onClick={() => {}}>
+            <Chrome aria-hidden="true" size={24} strokeWidth={2.1} />
+            Google
+          </button>
+          <button type="button" className="registration-alternative registration-alternative--gmail" onClick={() => {}}>
+            <Mail aria-hidden="true" size={24} strokeWidth={2.3} />
+            Gmail
+          </button>
+        </div>
+
+        <RegistrationFeatureGrid />
+
+        <div className="registration-consent">
+          <span className="registration-consent__lead"><CheckCircle2 aria-hidden="true" size={20} strokeWidth={2.2} /> By continuing, you agree to our</span>
+          <span className="registration-consent__links">
+            <button type="button" className="registration-link" onClick={() => {}}>Terms &amp; Conditions</button>
+            <span aria-hidden="true">•</span>
+            <button type="button" className="registration-link" onClick={() => {}}>Privacy Policy</button>
+          </span>
+        </div>
+
+        <div className="registration-trust-badge"><ShieldCheck aria-hidden="true" size={18} strokeWidth={2.2} /> Trusted by 10,000+ users across India</div>
+
+        {onOpenAdmin && <button type="button" onClick={onOpenAdmin} className="registration-admin-link">Admin Panel</button>}
       </div>
-    </section>
+    </RegistrationLayout>
   )
 }

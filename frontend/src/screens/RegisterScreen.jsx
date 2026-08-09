@@ -1,40 +1,39 @@
-import { Smartphone } from 'lucide-react'
-import ScreenHeader from '../components/ScreenHeader'
-import IconBadge from '../components/IconBadge'
-import PrimaryButton from '../components/PrimaryButton'
+import { Phone, ShieldCheck } from 'lucide-react'
+import RegistrationLayout from '../components/RegistrationLayout'
 
-export default function RegisterScreen({ formData, onBack, onNext, onFieldChange }) {
+export default function RegisterScreen({ formData, onBack, onNext, onFieldChange, error }) {
   return (
-    <section className="flex min-h-full flex-col px-5 pb-8">
-      <ScreenHeader title="Register" onBack={onBack} />
-      <div className="pt-11 text-center">
-        <IconBadge icon={Smartphone} label="Mobile phone" />
-        <h2 className="mt-6 text-[16px] font-extrabold tracking-[-0.03em]">Enter Mobile Number</h2>
-        <p className="mx-auto mt-3 max-w-[230px] text-[11px] leading-6 text-[#6e6872]">We&apos;ll send you an OTP to verify<br />your number</p>
-      </div>
-
-      <div className="mt-7">
-        <label className="flex h-[48px] items-center rounded-control border border-brand-purple/30 bg-white px-3 transition focus-within:border-brand-purple focus-within:ring-2 focus-within:ring-brand-purple/10">
-          <span className="border-r border-brand-border pr-3 text-[12px] font-medium text-[#3f3943]">+91</span>
+    <RegistrationLayout
+      title="C2C Personal Registration"
+      subtitle="Step 1: Mobile & OTP Verification"
+      currentStep="mobileOtp"
+      onBack={onBack}
+      actionLabel="Send OTP"
+      onAction={onNext}
+      actionHint={error}
+    >
+      <div className="registration-card registration-card--form registration-card--centered">
+        <div className="registration-card__icon registration-card__icon--stacked">
+          <ShieldCheck aria-hidden="true" size={38} strokeWidth={2.1} />
+          <Phone aria-hidden="true" size={23} strokeWidth={2.2} className="registration-card__phone" />
+        </div>
+        <label htmlFor="register-phone" className="registration-field-label registration-field-label--left">Mobile Number</label>
+        <div className="registration-phone-field">
+          <span className="registration-country-code" aria-label="India country code">🇮🇳 +91</span>
           <input
+            id="register-phone"
             type="tel"
-            inputMode="tel"
+            inputMode="numeric"
+            autoComplete="tel"
             value={formData.phone}
             onChange={(event) => onFieldChange('phone', event.target.value)}
-            placeholder="Enter mobile number"
-            aria-label="Mobile number"
-            className="min-w-0 flex-1 bg-transparent px-3 text-[12px] text-[#312b35] placeholder:text-[#a29ca6] focus:outline-hidden"
+            placeholder="Enter Your Mobile Number"
+            className="registration-input"
           />
-        </label>
-        <div className="mt-5">
-          <PrimaryButton onClick={onNext}>Send OTP</PrimaryButton>
         </div>
+        {error && <p className="registration-error registration-error--left" role="alert">{error}</p>}
+        <p className="registration-card__hint">We will send a 6-digit One Time Password (OTP) for verification.</p>
       </div>
-
-      <p className="mt-auto pb-3 text-center text-[10px] leading-5 text-[#77717b]">
-        By continuing, you agree to our<br />
-        <button type="button" onClick={() => {}} className="font-bold text-brand-purple">Terms of Use</button> an <button type="button" onClick={() => {}} className="font-bold text-brand-purple">Privacy Policy</button>
-      </p>
-    </section>
+    </RegistrationLayout>
   )
 }

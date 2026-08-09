@@ -1,26 +1,41 @@
 export const SCREEN_ORDER = Object.freeze([
+  'roleSelect',
+  'driverIntro',
   'welcome',
   'register',
   'verifyOtp',
-  'personalDetails',
-  'trustedContacts',
-  'becomeDriver',
-  'drivingLicence',
-  'vehicleDetails',
-  'vehiclePhotos',
+  'aadhaarEkyc',
+  'contactInfo',
+  'complete',
 ])
 
 export const SCREEN_META = Object.freeze({
-  welcome: { title: null },
-  register: { title: 'Register' },
-  verifyOtp: { title: 'Verify OTP' },
-  personalDetails: { title: 'Personal Details' },
-  trustedContacts: { title: 'Trusted Emergency Contacts' },
-  becomeDriver: { title: 'Become a Driver?' },
-  drivingLicence: { title: 'Driving Licence' },
-  vehicleDetails: { title: 'Vehicle Details' },
-  vehiclePhotos: { title: 'Vehicle Photos' },
+  roleSelect: { title: null, progressStep: null },
+  driverIntro: { title: 'For Drivers', progressStep: null },
+  welcome: { title: null, progressStep: null },
+  register: { title: 'C2C Personal Registration', progressStep: 'mobileOtp' },
+  verifyOtp: { title: 'Verify OTP', progressStep: 'mobileOtp' },
+  aadhaarEkyc: { title: 'Aadhaar eKYC', progressStep: 'aadhaarEkyc' },
+  contactInfo: { title: 'Contact Information', progressStep: 'contactInfo' },
+  complete: { title: 'Person Verified!', progressStep: 'complete' },
 })
+
+export const ROLE_OPTIONS = Object.freeze([
+  Object.freeze({ id: 'passenger', label: 'I need a ride', description: 'Find a trusted carpool', accent: 'passenger' }),
+  Object.freeze({ id: 'driver', label: 'I am driving', description: 'Share your empty seats', accent: 'driver' }),
+])
+
+export const PAYMENT_SUMMARY = Object.freeze({
+  profileVerification: Object.freeze({ amount: 0, label: 'Free Verification' }),
+  agreementCreation: Object.freeze({ amount: 99, label: 'Per Agreement', note: 'Pay ₹99 only when you create an agreement.' }),
+})
+
+export const REGISTRATION_STEPS = Object.freeze([
+  { id: 'mobileOtp', label: 'Mobile OTP' },
+  { id: 'aadhaarEkyc', label: 'Aadhaar eKYC' },
+  { id: 'contactInfo', label: 'Contact Info' },
+  { id: 'complete', label: 'Complete' },
+])
 
 export const DRIVER_OPTIONS = Object.freeze([
   {
@@ -89,8 +104,17 @@ export const PASSENGER_CONDUCT_RULES = Object.freeze([
 ])
 
 export const createInitialFormState = () => ({
+  selectedRole: null,
+  registrationMode: 'login',
   phone: '',
   otp: ['', '', '', '', '', ''],
+  aadhaarNumber: '',
+  registrationConsent: true,
+  verificationStatus: 'pending',
+  paymentStatus: 'pay-on-agreement',
+  profileVerificationFee: PAYMENT_SUMMARY.profileVerification.amount,
+  agreementCreationFee: PAYMENT_SUMMARY.agreementCreation.amount,
+  completionViewed: false,
   fullName: '',
   email: '',
   dateOfBirth: '',

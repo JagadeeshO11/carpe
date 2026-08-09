@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MapPin, Calendar, Star, Car, ShieldCheck, CheckCircle2, ChevronRight, Filter } from 'lucide-react'
 import PrimaryButton from '../components/PrimaryButton'
 import SeatSelectionScreen from './SeatSelectionScreen'
 
-export default function FindRidesScreen({ rides, onBookRide }) {
+export default function FindRidesScreen({ rides, onBookRide, initialRideId }) {
   const [origin, setOrigin] = useState('')
   const [destination, setDestination] = useState('')
   const [travelDate, setTravelDate] = useState('2026-08-09')
@@ -31,6 +31,15 @@ export default function FindRidesScreen({ rides, onBookRide }) {
     setSelectedPickup(ride.pickupPoints[0] || ride.origin)
     setSelectedSeats(1)
   }
+
+  useEffect(() => {
+    if (!initialRideId) return
+    const ride = rides.find((candidate) => String(candidate.id) === String(initialRideId))
+    if (!ride) return
+    setSelectedRide(ride)
+    setSelectedPickup(ride.pickupPoints[0] || ride.origin)
+    setSelectedSeats(1)
+  }, [initialRideId, rides])
 
   const handleConfirmBooking = () => {
     if (!selectedRide) return

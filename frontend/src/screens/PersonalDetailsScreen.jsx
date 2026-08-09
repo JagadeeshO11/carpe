@@ -1,37 +1,40 @@
-import { CalendarDays, Mail, UserRound } from 'lucide-react'
-import ScreenHeader from '../components/ScreenHeader'
-import IconBadge from '../components/IconBadge'
-import PrimaryButton from '../components/PrimaryButton'
-import { FormField } from '../components/FormField'
+import { CreditCard, ShieldCheck } from 'lucide-react'
+import RegistrationLayout from '../components/RegistrationLayout'
 
-export default function PersonalDetailsScreen({ formData, onBack, onNext, onFieldChange }) {
+export default function PersonalDetailsScreen({ formData, onBack, onNext, onFieldChange, error }) {
   return (
-    <section className="flex min-h-full flex-col px-5 pb-8">
-      <ScreenHeader title="Personal Details" onBack={onBack} />
-      <div className="pt-9 text-center">
-        <IconBadge icon={UserRound} label="Personal details" />
-        <h2 className="mt-5 text-[15px] font-extrabold tracking-[-0.03em]">Tell us about yourself</h2>
+    <RegistrationLayout
+      title="Aadhaar eKYC"
+      subtitle="Step 2: Secure identity verification"
+      currentStep="aadhaarEkyc"
+      onBack={onBack}
+      actionLabel="Continue"
+      onAction={onNext}
+      actionHint={error}
+    >
+      <div className="registration-card registration-card--form registration-card--centered">
+        <div className="registration-card__icon">
+          <CreditCard aria-hidden="true" size={40} strokeWidth={2.1} />
+        </div>
+        <h2 className="registration-card__title">Aadhaar eKYC</h2>
+        <p className="registration-card__body">Verify your identity securely to continue your digital sale agreement registration.</p>
+        <label htmlFor="aadhaar-number" className="registration-field-label registration-field-label--left registration-field-label--spaced">Aadhaar Number</label>
+        <div className="registration-input-field">
+          <input
+            id="aadhaar-number"
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={12}
+            value={formData.aadhaarNumber}
+            onChange={(event) => onFieldChange('aadhaarNumber', event.target.value.replace(/\D/g, '').slice(0, 12))}
+            placeholder="Enter Aadhaar number"
+            className="registration-input"
+          />
+        </div>
+        {error && <p className="registration-error registration-error--left" role="alert">{error}</p>}
+        <p className="registration-card__hint"><ShieldCheck aria-hidden="true" size={16} strokeWidth={2.1} /> Your Aadhaar is used only for secure identity verification.</p>
       </div>
-
-      <div className="mt-6 space-y-4">
-        <FormField icon={UserRound} placeholder="Full Name" value={formData.fullName} onChange={(event) => onFieldChange('fullName', event.target.value)} />
-        <FormField icon={Mail} placeholder="Email Address (optional)" type="email" value={formData.email} onChange={(event) => onFieldChange('email', event.target.value)} />
-        <FormField icon={CalendarDays} placeholder="Date of Birth" type="date" value={formData.dateOfBirth} onChange={(event) => onFieldChange('dateOfBirth', event.target.value)} />
-        <label className="flex min-h-[40px] items-center gap-2 rounded-control border border-brand-border bg-white px-3 transition focus-within:border-brand-purple/60 focus-within:ring-2 focus-within:ring-brand-purple/10">
-          <UserRound aria-hidden="true" size={15} strokeWidth={2} className="shrink-0 text-brand-purple" />
-          <select value={formData.gender} onChange={(event) => onFieldChange('gender', event.target.value)} aria-label="Gender" className="min-w-0 flex-1 appearance-none bg-transparent text-[11px] text-[#6e6872] focus:outline-hidden">
-            <option value="">Gender</option>
-            <option value="female">Female</option>
-            <option value="male">Male</option>
-            <option value="other">Prefer not to say</option>
-          </select>
-          <span className="text-[16px] text-brand-purple" aria-hidden="true">⌄</span>
-        </label>
-      </div>
-
-      <div className="mt-auto pt-9">
-        <PrimaryButton onClick={onNext}>Continue</PrimaryButton>
-      </div>
-    </section>
+    </RegistrationLayout>
   )
 }
