@@ -103,7 +103,7 @@ export const createInitialFormState = () => ({
   vehicleType: '',
   fuelType: '',
   rcDetails: '',
-  seatingCapacity: '4 Seats',
+  seatingCapacity: '4 Seater',
   luggageCapacity: '2 Bags',
   // Driver verification status
   driverVerificationStatus: 'PENDING',

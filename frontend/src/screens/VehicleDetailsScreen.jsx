@@ -4,8 +4,28 @@ import IconBadge from '../components/IconBadge'
 import PrimaryButton from '../components/PrimaryButton'
 import { FormField, SelectField } from '../components/FormField'
 import { VEHICLE_FIELDS } from '../data/onboardingData'
+import { useState } from 'react'
+
+const SEATING_OPTIONS = [
+  '4 Seater',
+  '5 Seater',
+  '6 Seater',
+  '7 Seater',
+  '8+ Seater',
+]
 
 export default function VehicleDetailsScreen({ formData, onBack, onNext, onFieldChange }) {
+  const [error, setError] = useState('')
+
+  const handleContinue = () => {
+    if (!formData.seatingCapacity) {
+      setError('Please select total vehicle seats')
+      return
+    }
+    setError('')
+    onNext()
+  }
+
   return (
     <section className="flex min-h-full flex-col px-5 pb-8">
       <ScreenHeader title="Vehicle Details" onBack={onBack} />
@@ -26,10 +46,20 @@ export default function VehicleDetailsScreen({ formData, onBack, onNext, onField
             placeholder={field.placeholder}
           />
         ))}
+
+        <SelectField
+          label="Total Vehicle Seats"
+          value={formData.seatingCapacity}
+          onChange={(e) => onFieldChange('seatingCapacity', e.target.value)}
+          options={SEATING_OPTIONS}
+          placeholder="Select seating capacity"
+        />
+
+        {error && <p className="text-rose-600 text-[11px] font-semibold">{error}</p>}
       </div>
 
       <div className="mt-auto pt-7">
-        <PrimaryButton onClick={onNext}>Continue</PrimaryButton>
+        <PrimaryButton onClick={handleContinue}>Continue</PrimaryButton>
       </div>
     </section>
   )

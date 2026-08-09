@@ -145,6 +145,7 @@ function App() {
           mode={appMode}
           onModeToggle={toggleMode}
           onEmergencySos={() => setActiveTab('profile')}
+          hideChrome={activeTab === 'admin'}
         >
           {activeTab === 'find' && (
             <FindRidesScreen rides={rides} onBookRide={handleBookRide} />

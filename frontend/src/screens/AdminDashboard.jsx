@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { CheckCircle2, X, FileText, Users, Car } from 'lucide-react'
-import ScreenHeader from '../components/ScreenHeader'
 import PrimaryButton from '../components/PrimaryButton'
 import BarChart, { Sparkline } from '../components/MiniChart'
 import { MOCK_RIDES, MOCK_DRIVER_VEHICLES, MOCK_DRIVER_RIDES } from '../data/carpoolData'
@@ -21,7 +20,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <ScreenHeader title="Admin Panel" onBack={() => {}} />
 
       <div className="flex-1 space-y-4 px-5 pb-6 pt-4">
         <div className="flex gap-2 mb-2">
