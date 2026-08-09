@@ -17,10 +17,10 @@ export default function ProfileScreen({ formData, onGoToOnboarding, onEmergencyS
           {formData.fullName ? formData.fullName.charAt(0).toUpperCase() : 'J'}
         </div>
         <h2 className="mt-2 text-[15px] font-extrabold text-[#241c2c]">
-          {formData.fullName || 'Jagadeesh Osuru'}
+            {formData.fullName || 'Demo User'}
         </h2>
         <p className="text-[10px] text-[#6e6872]">
-          {formData.phone || '+91 98765 43210'} • {formData.email || 'jagadeesh@example.com'}
+            {formData.phone || '+91 00000 00000'} • {formData.email || 'user@example.com'}
         </p>
 
         <div className="mt-3 flex items-center justify-center gap-2">

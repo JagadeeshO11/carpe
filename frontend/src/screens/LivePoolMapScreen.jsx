@@ -9,7 +9,7 @@ export default function LivePoolMapScreen({ bookings }) {
   const [otpVerified, setOtpVerified] = useState(false)
 
   const activeBooking = bookings[0] || {
-    driverName: 'Jagadeesh O.',
+    driverName: 'Demo Driver',
     driverPhone: '+91 98765 43210',
     vehicleModel: 'Tata Nexon',
     vehicleNumber: 'KA 01 AB 1234',

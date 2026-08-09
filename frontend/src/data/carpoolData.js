@@ -74,7 +74,7 @@ export const POPULAR_LOCATIONS = [
 export const MOCK_RIDES = [
   {
     id: 'ride-1',
-    driverName: 'Jagadeesh O.',
+    driverName: 'Demo Driver',
     driverRating: 4.9,
     driverRides: 42,
     driverPhone: '+91 98765 43210',
@@ -184,7 +184,7 @@ export const MOCK_USER_BOOKINGS = [
   {
     id: 'booking-101',
     rideId: 'ride-1',
-    driverName: 'Jagadeesh O.',
+    driverName: 'Demo Driver',
     driverPhone: '+91 98765 43210',
     vehicleModel: 'Tata Nexon',
     vehicleType: 'suv',

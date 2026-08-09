@@ -27,7 +27,7 @@ export default function OfferRideScreen({ formData, onPublishRide }) {
   const handlePublish = () => {
     const newRide = {
       id: `ride-${Date.now()}`,
-      driverName: formData.fullName || 'Jagadeesh O.',
+      driverName: formData.fullName || 'Demo Driver',
       driverRating: 5.0,
       driverRides: 1,
       driverPhone: formData.phone || '+91 98765 43210',
