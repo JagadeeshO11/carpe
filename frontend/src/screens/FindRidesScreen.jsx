@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { MapPin, Calendar, Star, Car, ShieldCheck, CheckCircle2, ChevronRight, Filter } from 'lucide-react'
 import PrimaryButton from '../components/PrimaryButton'
+import SeatSelectionScreen from './SeatSelectionScreen'
 
 export default function FindRidesScreen({ rides, onBookRide }) {
   const [origin, setOrigin] = useState('')
@@ -208,70 +209,40 @@ export default function FindRidesScreen({ rides, onBookRide }) {
         </div>
       </div>
 
-      {/* Booking Confirmation Modal */}
+      {/* Booking Confirmation / Seat selection Modal */}
       {selectedRide && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-[340px] rounded-2xl bg-white p-4 shadow-xl">
-            <h3 className="text-[14px] font-bold text-[#2a2430]">Confirm Seat Booking</h3>
-            <p className="mt-0.5 text-[10px] text-[#6e6872]">Ride with {selectedRide.driverName}</p>
-
-            <div className="mt-3 space-y-3">
-              <div>
-                <label className="block text-[10px] font-semibold text-[#554e5b] mb-1">Select Pickup Stop along route</label>
-                <select
-                  value={selectedPickup}
-                  onChange={(e) => setSelectedPickup(e.target.value)}
-                  className="w-full rounded-control border border-brand-border bg-white px-3 py-2 text-[11px] text-[#312b35] focus:outline-none"
-                >
-                  {selectedRide.pickupPoints.map((pt) => (
-                    <option key={pt} value={pt}>
-                      {pt}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-semibold text-[#554e5b] mb-1">Number of Seats</label>
-                <div className="flex items-center gap-3">
-                  {[1, 2, 3].map((num) => (
-                    <button
-                      key={num}
-                      type="button"
-                      onClick={() => setSelectedSeats(num)}
-                      className={`flex h-8 w-12 items-center justify-center rounded-control border text-[11px] font-bold ${selectedSeats === num ? 'border-brand-purple bg-brand-purple text-white' : 'border-brand-border bg-white text-[#312b35]'}`}
-                    >
-                      {num}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-xl bg-brand-lavender p-2.5 text-[11px]">
-                <div className="flex justify-between font-bold text-[#2d2731]">
-                  <span>Total Amount</span>
-                  <span className="text-brand-purple">₹{selectedRide.pricePerSeat * selectedSeats}</span>
-                </div>
-                <p className="mt-1 text-[9px] text-[#77717b]">Pay directly to driver via Cash/UPI on trip start.</p>
-              </div>
-            </div>
-
-            <div className="mt-4 flex gap-2">
-              <button
-                type="button"
-                onClick={() => setSelectedRide(null)}
-                className="flex-1 rounded-control border border-brand-border py-2 text-[11px] font-bold text-[#6e6872]"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmBooking}
-                className="flex-1 rounded-control bg-brand-purple py-2 text-[11px] font-bold text-white shadow-xs"
-              >
-                Confirm
-              </button>
-            </div>
+          <div className="w-full max-w-[420px] rounded-2xl bg-white p-4 shadow-xl">
+            <SeatSelectionScreen
+              ride={selectedRide}
+              existingBookings={[]}
+              onBack={() => setSelectedRide(null)}
+              onConfirm={({ seatId, seatLabel, hasTrolley, gender }) => {
+                const booking = {
+                  id: `booking-${Date.now()}`,
+                  rideId: selectedRide.id,
+                  driverName: selectedRide.driverName,
+                  driverPhone: selectedRide.driverPhone,
+                  vehicleModel: selectedRide.vehicleModel,
+                  vehicleNumber: selectedRide.vehicleNumber,
+                  pickupPoint: selectedPickup,
+                  dropPoint: selectedRide.destination,
+                  seatsBooked: 1,
+                  seatId,
+                  seatLabel,
+                  hasTrolley: !!hasTrolley,
+                  gender: gender || 'male',
+                  totalPrice: selectedRide.pricePerSeat * 1,
+                  date: selectedRide.date,
+                  time: selectedRide.time,
+                  otp: Math.floor(1000 + Math.random() * 9000).toString(),
+                  status: 'Confirmed',
+                }
+                onBookRide(booking)
+                setBookingSuccess(booking)
+                setSelectedRide(null)
+              }}
+            />
           </div>
         </div>
       )}

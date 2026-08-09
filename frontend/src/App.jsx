@@ -47,6 +47,7 @@ function App() {
   const goNext = () => {
     if (currentIndex === SCREEN_ORDER.length - 1 || (currentScreen === 'becomeDriver' && formData.driverIntent === 'no')) {
       setCurrentScreen('mainApp')
+      setActiveTab(appMode === 'driver' ? 'offer' : 'find')
     } else {
       setCurrentScreen(SCREEN_ORDER[Math.min(currentIndex + 1, SCREEN_ORDER.length - 1)])
     }
@@ -62,6 +63,7 @@ function App() {
 
   const exploreMainApp = () => {
     setCurrentScreen('mainApp')
+    setActiveTab(appMode === 'driver' ? 'offer' : 'find')
   }
 
   const updateField = (field, value) => {
@@ -106,10 +108,31 @@ function App() {
 
   const handleBookRide = (newBooking) => {
     setBookings((prev) => [newBooking, ...prev])
+    // If booking included a specific seat, mark that seat occupied on the ride
+    if (newBooking.seatId) {
+      setRides((prev) => prev.map((r) => {
+        if (r.id !== newBooking.rideId) return r
+        const seatsOccupied = [...(r.seatsOccupied || []), newBooking.seatId]
+        const seatsAvailable = Math.max(0, (r.seatsTotal || r.seatsAvailable || 0) - seatsOccupied.length)
+        return { ...r, seatsOccupied, seatsAvailable }
+      }))
+    } else {
+      // fallback: decrement seatsAvailable by booked seats count
+      setRides((prev) => prev.map((r) => r.id === newBooking.rideId ? { ...r, seatsAvailable: Math.max(0, (r.seatsAvailable || 0) - (newBooking.seatsBooked || 1)) } : r))
+    }
   }
 
   const toggleMode = () => {
-    setAppMode((prev) => (prev === 'passenger' ? 'driver' : 'passenger'))
+    setAppMode((prev) => {
+      const next = prev === 'passenger' ? 'driver' : 'passenger'
+      setActiveTab(next === 'driver' ? 'offer' : 'find')
+      return next
+    })
+  }
+
+  const chooseRole = (role) => {
+    setAppMode(role)
+    setActiveTab(role === 'driver' ? 'offer' : 'find')
   }
 
   // Render Main Carpool App when onboarding is complete or exploring prototype
@@ -160,6 +183,7 @@ function App() {
         onBack={goBack}
         onNext={goNext}
         onExploreApp={exploreMainApp}
+        onChooseRole={chooseRole}
         onFieldChange={updateField}
         onOtpChange={updateOtp}
         onContactAdd={addContact}

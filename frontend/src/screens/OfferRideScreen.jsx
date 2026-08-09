@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Car, MapPin, Plus, Trash2, CheckCircle2 } from 'lucide-react'
 import PrimaryButton from '../components/PrimaryButton'
+import SeatMap from '../components/SeatMap'
+import { SEAT_LAYOUTS } from '../data/carpoolData'
 
 export default function OfferRideScreen({ formData, onPublishRide }) {
   const [origin, setOrigin] = useState('Electronic City')
@@ -12,6 +14,13 @@ export default function OfferRideScreen({ formData, onPublishRide }) {
   const [seats, setSeats] = useState(3)
   const [price, setPrice] = useState(350)
   const [published, setPublished] = useState(false)
+  const vehicleType = formData.vehicleType || 'suv'
+  const defaultAvailable = (SEAT_LAYOUTS[vehicleType] || SEAT_LAYOUTS.sedan).filter(s => s.bookable).map(s => s.id)
+  const [seatAvailability, setSeatAvailability] = useState(defaultAvailable)
+
+  useEffect(() => {
+    setSeats(seatAvailability.length)
+  }, [seatAvailability])
 
   const handleAddStop = () => {
     if (newStop.trim()) {
@@ -41,8 +50,9 @@ export default function OfferRideScreen({ formData, onPublishRide }) {
       dropPoints: [...stops, destination],
       date,
       time,
-      seatsAvailable: seats,
-      seatsTotal: seats,
+      seatsAvailable: seatAvailability.length,
+      seatsTotal: seatAvailability.length,
+      seatsOccupied: [],
       pricePerSeat: Number(price),
       luggage: formData.luggageCapacity || '2 Bags per rider',
       routeDescription: 'Published driver pool ride. Smooth travel on highway.',
@@ -190,19 +200,12 @@ export default function OfferRideScreen({ formData, onPublishRide }) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2">
               <div>
-                <label className="block text-[9px] font-semibold text-[#77717b] mb-1">Available Seats</label>
-                <select
-                  value={seats}
-                  onChange={(e) => setSeats(Number(e.target.value))}
-                  className="w-full rounded-control border border-brand-border bg-white px-2.5 py-1.5 text-[10px] text-[#312b35]"
-                >
-                  <option value={1}>1 Seat</option>
-                  <option value={2}>2 Seats</option>
-                  <option value={3}>3 Seats</option>
-                  <option value={4}>4 Seats</option>
-                </select>
+                <label className="block text-[9px] font-semibold text-[#77717b] mb-1">Configure Seats (tap to mark available)</label>
+                <div className="rounded-xl border border-brand-border bg-white p-3">
+                  <SeatMap vehicleType={vehicleType} editable initialAvailable={defaultAvailable} onChange={setSeatAvailability} />
+                </div>
               </div>
 
               <div>

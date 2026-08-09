@@ -1,7 +1,7 @@
 import PrimaryButton from '../components/PrimaryButton'
 import WelcomeIllustration from '../components/WelcomeIllustration'
 
-export default function WelcomeScreen({ onNext, onExploreApp, onOpenAdmin }) {
+export default function WelcomeScreen({ onNext, onExploreApp, onOpenAdmin, onChooseRole }) {
   return (
     <section className="flex min-h-full flex-col px-5 pb-8 text-center">
       <div className="pt-24">
@@ -18,10 +18,25 @@ export default function WelcomeScreen({ onNext, onExploreApp, onOpenAdmin }) {
       <div className="mt-auto">
         <WelcomeIllustration />
         <div className="mt-3 space-y-2">
-          <PrimaryButton onClick={onNext}>Get Started</PrimaryButton>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => { onChooseRole && onChooseRole('passenger'); onNext() }}
+              className="w-full rounded-control bg-brand-lavender py-2.5 text-[11px] font-bold text-brand-purple"
+            >
+              I'm a Passenger
+            </button>
+            <button
+              type="button"
+              onClick={() => { onChooseRole && onChooseRole('driver'); onNext() }}
+              className="w-full rounded-control border border-brand-purple/40 bg-white py-2.5 text-[11px] font-bold text-brand-purple hover:bg-brand-lavender-very-light"
+            >
+              I'm a Driver
+            </button>
+          </div>
           <button
             type="button"
-            onClick={onExploreApp}
+            onClick={() => { onChooseRole && onChooseRole('passenger'); onExploreApp() }}
             className="w-full rounded-control border border-brand-purple/40 bg-brand-lavender py-2.5 text-[11px] font-bold text-brand-purple hover:bg-brand-lavender-strong transition"
           >
             Explore Carpool Prototype

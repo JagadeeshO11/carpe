@@ -46,23 +46,27 @@ export default function MainAppShell({ activeTab, onTabChange, mode, onModeToggl
 
       {/* Bottom Navigation Bar */}
       <nav className="flex h-16 shrink-0 items-center justify-around border-t border-[#f0ebf5] bg-white px-2">
-        <button
-          type="button"
-          onClick={() => onTabChange('find')}
-          className={`flex flex-col items-center gap-1 text-[10px] font-semibold transition ${activeTab === 'find' ? 'text-brand-purple font-bold' : 'text-[#77717b] hover:text-[#312b35]'}`}
-        >
-          <Search size={18} strokeWidth={activeTab === 'find' ? 2.5 : 1.8} />
-          <span>Find Ride</span>
-        </button>
+        {mode === 'passenger' && (
+          <button
+            type="button"
+            onClick={() => onTabChange('find')}
+            className={`flex flex-col items-center gap-1 text-[10px] font-semibold transition ${activeTab === 'find' ? 'text-brand-purple font-bold' : 'text-[#77717b] hover:text-[#312b35]'}`}
+          >
+            <Search size={18} strokeWidth={activeTab === 'find' ? 2.5 : 1.8} />
+            <span>Find Ride</span>
+          </button>
+        )}
 
-        <button
-          type="button"
-          onClick={() => onTabChange('offer')}
-          className={`flex flex-col items-center gap-1 text-[10px] font-semibold transition ${activeTab === 'offer' ? 'text-brand-purple font-bold' : 'text-[#77717b] hover:text-[#312b35]'}`}
-        >
-          <Car size={18} strokeWidth={activeTab === 'offer' ? 2.5 : 1.8} />
-          <span>Offer Ride</span>
-        </button>
+        {mode === 'driver' && (
+          <button
+            type="button"
+            onClick={() => onTabChange('offer')}
+            className={`flex flex-col items-center gap-1 text-[10px] font-semibold transition ${activeTab === 'offer' ? 'text-brand-purple font-bold' : 'text-[#77717b] hover:text-[#312b35]'}`}
+          >
+            <Car size={18} strokeWidth={activeTab === 'offer' ? 2.5 : 1.8} />
+            <span>Offer Ride</span>
+          </button>
+        )}
 
         <button
           type="button"
