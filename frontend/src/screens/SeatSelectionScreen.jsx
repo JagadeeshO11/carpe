@@ -2,11 +2,22 @@ import { useState } from 'react'
 import { MapPin, Users, Package, CheckCircle2, X } from 'lucide-react'
 import PrimaryButton from '../components/PrimaryButton'
 import ScreenHeader from '../components/ScreenHeader'
-import { SEAT_LAYOUTS, getAllocatedSeatsForWomen } from '../data/carpoolData'
+import { SEAT_LAYOUTS, getAllocatedSeatsForWomen, getCityRouteStops } from '../data/carpoolData'
 
-export default function SeatSelectionScreen({ ride, existingBookings = [], onConfirm, onBack }) {
+export default function SeatSelectionScreen({
+  ride,
+  existingBookings = [],
+  onConfirm,
+  onBack,
+  selectedPickup,
+  selectedDrop,
+  onRouteChange,
+}) {
   const vehicleType = ride?.vehicleType || 'sedan'
   const layout = SEAT_LAYOUTS[vehicleType] || SEAT_LAYOUTS.sedan
+  const routeStops = getCityRouteStops(ride)
+  const activePickup = selectedPickup || routeStops.pickupPoints[0]
+  const activeDrop = selectedDrop || routeStops.dropPoints[routeStops.dropPoints.length - 1]
 
   const [selectedSeat, setSelectedSeat] = useState(null)
   const [gender, setGender] = useState('male')
@@ -27,7 +38,14 @@ export default function SeatSelectionScreen({ ride, existingBookings = [], onCon
 
   const handleConfirm = () => {
     if (!selectedSeat) { setError('Please select a seat to continue.'); return }
-    onConfirm({ seatId: selectedSeat, seatLabel: layout.find(s => s.id === selectedSeat)?.label, hasTrolley, gender })
+    onConfirm({
+      seatId: selectedSeat,
+      seatLabel: layout.find(s => s.id === selectedSeat)?.label,
+      hasTrolley,
+      gender,
+      pickupPoint: activePickup,
+      dropPoint: activeDrop,
+    })
   }
 
   // Group seats by row
@@ -55,6 +73,43 @@ export default function SeatSelectionScreen({ ride, existingBookings = [], onCon
           <span className="rounded-full bg-brand-purple/10 px-2 py-0.5 text-[9px] font-bold text-brand-purple capitalize">
             {vehicleType === 'mpv' ? 'MPV' : vehicleType}
           </span>
+        </div>
+
+        <div className="rounded-xl border border-brand-border bg-white p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-bold text-[#312b35]">City-to-city segment</p>
+            <span className="text-[9px] font-bold text-brand-purple">
+              5 departure + 5 arrival stops
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-2">
+            <label className="space-y-1">
+              <span className="block text-[9px] font-semibold text-[#77717b]">Departure city stop</span>
+              <select
+                value={activePickup}
+                onChange={(event) => onRouteChange?.({ pickupPoint: event.target.value, dropPoint: activeDrop })}
+                className="w-full rounded-control border border-brand-border bg-white px-2.5 py-1.5 text-[10px] text-[#312b35] focus:outline-none"
+              >
+                {routeStops.pickupPoints.map((stop) => (
+                  <option key={stop} value={stop}>{stop}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className="space-y-1">
+              <span className="block text-[9px] font-semibold text-[#77717b]">Arrival city stop</span>
+              <select
+                value={activeDrop}
+                onChange={(event) => onRouteChange?.({ pickupPoint: activePickup, dropPoint: event.target.value })}
+                className="w-full rounded-control border border-brand-border bg-white px-2.5 py-1.5 text-[10px] text-[#312b35] focus:outline-none"
+              >
+                {routeStops.dropPoints.map((stop) => (
+                  <option key={stop} value={stop}>{stop}</option>
+                ))}
+              </select>
+            </label>
+          </div>
         </div>
 
         {/* Gender selection */}

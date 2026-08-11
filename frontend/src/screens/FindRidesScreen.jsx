@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { MapPin, Calendar, Star, Car, ShieldCheck, CheckCircle2, ChevronRight, Filter } from 'lucide-react'
 import PrimaryButton from '../components/PrimaryButton'
 import SeatSelectionScreen from './SeatSelectionScreen'
+import { getCityRouteStops } from '../data/carpoolData'
 
 export default function FindRidesScreen({ rides, onBookRide, initialRideId }) {
   const [origin, setOrigin] = useState('')
@@ -10,25 +11,29 @@ export default function FindRidesScreen({ rides, onBookRide, initialRideId }) {
   const [filterOnTheWay, setFilterOnTheWay] = useState(true)
   const [selectedRide, setSelectedRide] = useState(null)
   const [selectedPickup, setSelectedPickup] = useState('')
+  const [selectedDrop, setSelectedDrop] = useState('')
   const [selectedSeats, setSelectedSeats] = useState(1)
   const [bookingSuccess, setBookingSuccess] = useState(null)
 
   // Filter rides based on search criteria and on-the-way pickup points
   const filteredRides = rides.filter((ride) => {
+    const routeStops = getCityRouteStops(ride)
     const originMatch = !origin ||
       ride.origin.toLowerCase().includes(origin.toLowerCase()) ||
-      ride.pickupPoints.some((p) => p.toLowerCase().includes(origin.toLowerCase()))
+      routeStops.pickupPoints.some((p) => p.toLowerCase().includes(origin.toLowerCase()))
     
     const destMatch = !destination ||
       ride.destination.toLowerCase().includes(destination.toLowerCase()) ||
-      ride.dropPoints.some((d) => d.toLowerCase().includes(destination.toLowerCase()))
+      routeStops.dropPoints.some((d) => d.toLowerCase().includes(destination.toLowerCase()))
 
     return originMatch && destMatch
   })
 
   const openBookingModal = (ride) => {
+    const routeStops = getCityRouteStops(ride)
     setSelectedRide(ride)
-    setSelectedPickup(ride.pickupPoints[0] || ride.origin)
+    setSelectedPickup(routeStops.pickupPoints[0] || ride.origin)
+    setSelectedDrop(routeStops.dropPoints[routeStops.dropPoints.length - 1] || ride.destination)
     setSelectedSeats(1)
   }
 
@@ -36,8 +41,10 @@ export default function FindRidesScreen({ rides, onBookRide, initialRideId }) {
     if (!initialRideId) return
     const ride = rides.find((candidate) => String(candidate.id) === String(initialRideId))
     if (!ride) return
+    const routeStops = getCityRouteStops(ride)
     setSelectedRide(ride)
-    setSelectedPickup(ride.pickupPoints[0] || ride.origin)
+    setSelectedPickup(routeStops.pickupPoints[0] || ride.origin)
+    setSelectedDrop(routeStops.dropPoints[routeStops.dropPoints.length - 1] || ride.destination)
     setSelectedSeats(1)
   }, [initialRideId, rides])
 
@@ -51,7 +58,7 @@ export default function FindRidesScreen({ rides, onBookRide, initialRideId }) {
       vehicleModel: selectedRide.vehicleModel,
       vehicleNumber: selectedRide.vehicleNumber,
       pickupPoint: selectedPickup,
-      dropPoint: selectedRide.destination,
+      dropPoint: selectedDrop,
       seatsBooked: selectedSeats,
       totalPrice: selectedRide.pricePerSeat * selectedSeats,
       date: selectedRide.date,
@@ -144,7 +151,9 @@ export default function FindRidesScreen({ rides, onBookRide, initialRideId }) {
         </div>
 
         <div className="space-y-3">
-          {filteredRides.map((ride) => (
+          {filteredRides.map((ride) => {
+            const routeStops = getCityRouteStops(ride)
+            return (
             <div
               key={ride.id}
               className="rounded-xl border border-[#eee8f3] bg-white p-3.5 shadow-xs hover:border-brand-purple/40 transition"
@@ -195,7 +204,12 @@ export default function FindRidesScreen({ rides, onBookRide, initialRideId }) {
                 {/* On-the-way Pickup Nodes Badge */}
                 <div className="flex items-center gap-1 text-[9px] text-[#6e6872] bg-[#f9f7fc] p-1.5 rounded-md">
                   <MapPin size={10} className="text-brand-purple shrink-0" />
-                  <span className="truncate">Stops: {ride.pickupPoints.join(' ➔ ')}</span>
+                  <span className="truncate">Departure: {routeStops.pickupPoints.slice(1).join(' -> ')}</span>
+                </div>
+
+                <div className="flex items-center gap-1 text-[9px] text-[#6e6872] bg-emerald-50 p-1.5 rounded-md">
+                  <MapPin size={10} className="text-brand-green shrink-0" />
+                  <span className="truncate">Arrival: {routeStops.dropPoints.slice(1).join(' -> ')}</span>
                 </div>
 
                 <div className="flex items-center justify-between text-[10px] text-[#77717b] pt-1">
@@ -214,7 +228,8 @@ export default function FindRidesScreen({ rides, onBookRide, initialRideId }) {
                 <PrimaryButton onClick={() => openBookingModal(ride)}>Book Seat</PrimaryButton>
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
       </div>
 
@@ -225,8 +240,14 @@ export default function FindRidesScreen({ rides, onBookRide, initialRideId }) {
             <SeatSelectionScreen
               ride={selectedRide}
               existingBookings={[]}
+              selectedPickup={selectedPickup}
+              selectedDrop={selectedDrop}
+              onRouteChange={({ pickupPoint, dropPoint }) => {
+                setSelectedPickup(pickupPoint)
+                setSelectedDrop(dropPoint)
+              }}
               onBack={() => setSelectedRide(null)}
-              onConfirm={({ seatId, seatLabel, hasTrolley, gender }) => {
+              onConfirm={({ seatId, seatLabel, hasTrolley, gender, pickupPoint, dropPoint }) => {
                 const booking = {
                   id: `booking-${Date.now()}`,
                   rideId: selectedRide.id,
@@ -234,8 +255,8 @@ export default function FindRidesScreen({ rides, onBookRide, initialRideId }) {
                   driverPhone: selectedRide.driverPhone,
                   vehicleModel: selectedRide.vehicleModel,
                   vehicleNumber: selectedRide.vehicleNumber,
-                  pickupPoint: selectedPickup,
-                  dropPoint: selectedRide.destination,
+                  pickupPoint: pickupPoint || selectedPickup,
+                  dropPoint: dropPoint || selectedDrop,
                   seatsBooked: 1,
                   seatId,
                   seatLabel,

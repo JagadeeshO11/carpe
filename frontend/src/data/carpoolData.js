@@ -329,6 +329,30 @@ export const MOCK_RIDES = [
   },
 ]
 
+const CITY_ROUTE_STOP_COUNT = 5
+
+const fallbackStopsForCity = (city, type) => (
+  Array.from({ length: CITY_ROUTE_STOP_COUNT }, (_, index) => `${city} ${type} Stop ${index + 1}`)
+)
+
+const normalizeStopList = (stops = [], city, type) => {
+  const uniqueStops = [...new Set(stops.filter(Boolean))]
+  const withoutCityEndpoint = uniqueStops.filter((stop) => stop !== city)
+  const fallbackStops = fallbackStopsForCity(city, type)
+  return [city, ...withoutCityEndpoint, ...fallbackStops].slice(0, CITY_ROUTE_STOP_COUNT + 1)
+}
+
+export function getCityRouteStops(ride) {
+  const pickupPoints = normalizeStopList(ride?.pickupPoints, ride?.origin || 'Departure City', 'Departure')
+  const dropPoints = normalizeStopList(ride?.dropPoints, ride?.destination || 'Arrival City', 'Arrival')
+
+  return {
+    pickupPoints,
+    dropPoints,
+    routeStops: [...pickupPoints, ...dropPoints],
+  }
+}
+
 // ─── Mock Bookings ─────────────────────────────────────────────────────────
 export const MOCK_USER_BOOKINGS = [
   {
@@ -482,8 +506,14 @@ export const MOCK_DRIVER_EARNINGS = {
 // ─── Route Nodes Demo ──────────────────────────────────────────────────────
 export const ROUTE_NODES_DEMO = [
   { name: 'Electronic City', time: '08:30 AM', status: 'completed', distance: '0 km' },
-  { name: 'Kengeri Bus Station', time: '08:55 AM', status: 'current', distance: '18 km' },
-  { name: 'Ramanagara Bypass', time: '09:30 AM', status: 'upcoming', distance: '45 km' },
-  { name: 'Mandya Circle', time: '10:15 AM', status: 'upcoming', distance: '82 km' },
-  { name: 'Mysuru Bus Stand', time: '11:00 AM', status: 'upcoming', distance: '140 km' },
+  { name: 'Electronic City Phase 1', time: '08:38 AM', status: 'current', distance: '4 km' },
+  { name: 'Bommasandra', time: '08:46 AM', status: 'upcoming', distance: '9 km' },
+  { name: 'Hebbagodi', time: '08:54 AM', status: 'upcoming', distance: '13 km' },
+  { name: 'Chandapura', time: '09:02 AM', status: 'upcoming', distance: '18 km' },
+  { name: 'Attibele', time: '09:12 AM', status: 'upcoming', distance: '25 km' },
+  { name: 'Srirangapatna', time: '10:18 AM', status: 'upcoming', distance: '118 km' },
+  { name: 'Columbia Asia Mysuru', time: '10:35 AM', status: 'upcoming', distance: '130 km' },
+  { name: 'Mysuru Junction', time: '10:45 AM', status: 'upcoming', distance: '136 km' },
+  { name: 'Kuvempunagar', time: '10:53 AM', status: 'upcoming', distance: '140 km' },
+  { name: 'Mysuru Bus Stand', time: '11:00 AM', status: 'upcoming', distance: '144 km' },
 ]

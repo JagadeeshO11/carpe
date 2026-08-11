@@ -18,7 +18,7 @@ export default function DriverAuthScreen({ formData, onBack, onNext, onFieldChan
       <div className="auth-panel__hero">
         <span className="auth-panel__icon"><Car aria-hidden="true" size={35} /></span>
         <h2>Driver portal</h2>
-        <p>Manage rides and complete driver verification.</p>
+        <p>{isRegistering ? 'Create your driver account and complete verification.' : 'Sign in to manage rides and earnings.'}</p>
       </div>
       <div className="auth-panel__switch" role="tablist" aria-label="Driver authentication">
         <button type="button" role="tab" aria-selected={!isRegistering} onClick={() => onRegistrationModeChange('login')} className={!isRegistering ? 'auth-panel__switch-button auth-panel__switch-button--active' : 'auth-panel__switch-button'}><LogIn size={17} /> Sign in</button>
@@ -32,7 +32,7 @@ export default function DriverAuthScreen({ formData, onBack, onNext, onFieldChan
           <input id="driver-phone" type="tel" inputMode="numeric" autoComplete="tel" value={formData.phone} onChange={(event) => onFieldChange('phone', event.target.value)} placeholder="Enter 10-digit mobile number" className="registration-input" />
         </div>
         {error && <p className="registration-error registration-error--left" role="alert">{error}</p>}
-        <p className="auth-panel__note"><ShieldCheck aria-hidden="true" size={16} /> {isRegistering ? 'We will verify your mobile number before identity checks.' : 'Use the number connected to your driver account.'}</p>
+        <p className="auth-panel__note"><ShieldCheck aria-hidden="true" size={16} /> {isRegistering ? 'We will verify your mobile number before identity checks.' : 'OTP sign-in only. No onboarding needed.'}</p>
       </div>
     </RegistrationLayout>
   )

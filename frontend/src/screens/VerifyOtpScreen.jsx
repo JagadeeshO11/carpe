@@ -5,6 +5,7 @@ import RegistrationLayout from '../components/RegistrationLayout'
 export default function VerifyOtpScreen({ formData, onBack, onNext, onOtpChange, error }) {
   const inputRefs = useRef([])
   const isDriver = formData.selectedRole === 'driver'
+  const isDriverRegistering = isDriver && formData.registrationMode === 'register'
 
   const handleChange = (index, value) => {
     const digit = value.replace(/\D/g, '').slice(-1)
@@ -18,12 +19,12 @@ export default function VerifyOtpScreen({ formData, onBack, onNext, onOtpChange,
 
   return (
     <RegistrationLayout
-      title="Verify OTP"
-      subtitle={isDriver ? 'Step 1: Mobile & OTP Verification' : 'Confirm your mobile number to continue.'}
+      title={isDriver && !isDriverRegistering ? 'Driver sign in OTP' : 'Verify OTP'}
+      subtitle={isDriverRegistering ? 'Step 1: Mobile & OTP Verification' : 'Confirm your mobile number to continue.'}
       currentStep="mobileOtp"
-      showProgress={isDriver}
+      showProgress={isDriverRegistering}
       onBack={onBack}
-      actionLabel="Verify & Continue"
+      actionLabel={isDriver && !isDriverRegistering ? 'Verify & Sign In' : 'Verify & Continue'}
       onAction={onNext}
       actionHint={error}
     >

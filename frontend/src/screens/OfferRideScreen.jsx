@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Car, MapPin, Plus, Trash2, CheckCircle2 } from 'lucide-react'
+import { Car, MapPin, CheckCircle2 } from 'lucide-react'
 import PrimaryButton from '../components/PrimaryButton'
 import SeatMap from '../components/SeatMap'
 import { SEAT_LAYOUTS } from '../data/carpoolData'
@@ -7,8 +7,20 @@ import { SEAT_LAYOUTS } from '../data/carpoolData'
 export default function OfferRideScreen({ formData, onPublishRide }) {
   const [origin, setOrigin] = useState('Electronic City')
   const [destination, setDestination] = useState('Mysuru')
-  const [stops, setStops] = useState(['Kengeri Bus Station', 'Ramanagara Bypass'])
-  const [newStop, setNewStop] = useState('')
+  const [departureStops, setDepartureStops] = useState([
+    'Electronic City Phase 1',
+    'Bommasandra',
+    'Hebbagodi',
+    'Chandapura',
+    'Attibele',
+  ])
+  const [arrivalStops, setArrivalStops] = useState([
+    'Srirangapatna',
+    'Columbia Asia Mysuru',
+    'Mysuru Junction',
+    'Kuvempunagar',
+    'Mysuru Bus Stand',
+  ])
   const [date, setDate] = useState('2026-08-09')
   const [time, setTime] = useState('08:30 AM')
   const [seats, setSeats] = useState(3)
@@ -22,18 +34,17 @@ export default function OfferRideScreen({ formData, onPublishRide }) {
     setSeats(seatAvailability.length)
   }, [seatAvailability])
 
-  const handleAddStop = () => {
-    if (newStop.trim()) {
-      setStops([...stops, newStop.trim()])
-      setNewStop('')
-    }
+  const updateDepartureStop = (index, value) => {
+    setDepartureStops((previous) => previous.map((stop, idx) => idx === index ? value : stop))
   }
 
-  const handleRemoveStop = (index) => {
-    setStops(stops.filter((_, i) => i !== index))
+  const updateArrivalStop = (index, value) => {
+    setArrivalStops((previous) => previous.map((stop, idx) => idx === index ? value : stop))
   }
 
   const handlePublish = () => {
+    const cleanDepartureStops = departureStops.map((stop) => stop.trim()).filter(Boolean).slice(0, 5)
+    const cleanArrivalStops = arrivalStops.map((stop) => stop.trim()).filter(Boolean).slice(0, 5)
     const newRide = {
       id: `ride-${Date.now()}`,
       driverName: formData.fullName || 'Demo Driver',
@@ -46,8 +57,9 @@ export default function OfferRideScreen({ formData, onPublishRide }) {
       vehicleNumber: formData.vehicleNumber || 'KA 01 AB 1234',
       origin,
       destination,
-      pickupPoints: [origin, ...stops],
-      dropPoints: [...stops, destination],
+      pickupPoints: cleanDepartureStops,
+      dropPoints: cleanArrivalStops,
+      routeStops: [...cleanDepartureStops, ...cleanArrivalStops],
       date,
       time,
       seatsAvailable: seatAvailability.length,

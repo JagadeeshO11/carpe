@@ -20,6 +20,7 @@ const AUTH_PATHS = Object.freeze({
   driverLogin: '/driver/login',
   driverRegister: '/driver/register',
   driverVerifyOtp: '/driver/verify-otp',
+  driverRegisterVerifyOtp: '/driver/register/verify-otp',
   driverAadhaar: '/driver/aadhaar',
   driverContact: '/driver/contact',
   driverComplete: '/driver/complete',
@@ -70,6 +71,7 @@ export function formatAuthPath(role, screen = 'login') {
       login: AUTH_PATHS.driverLogin,
       register: AUTH_PATHS.driverRegister,
       verifyOtp: AUTH_PATHS.driverVerifyOtp,
+      registerVerifyOtp: AUTH_PATHS.driverRegisterVerifyOtp,
       aadhaarEkyc: AUTH_PATHS.driverAadhaar,
       contactInfo: AUTH_PATHS.driverContact,
       complete: AUTH_PATHS.driverComplete,
@@ -124,6 +126,7 @@ export function parseAppPath(pathname = '/') {
       driverLogin: 'welcome',
       driverRegister: 'welcome',
       driverVerifyOtp: 'verifyOtp',
+      driverRegisterVerifyOtp: 'verifyOtp',
       driverAadhaar: 'aadhaarEkyc',
       driverContact: 'contactInfo',
       driverComplete: 'complete',
@@ -131,7 +134,11 @@ export function parseAppPath(pathname = '/') {
     return {
       kind: ROUTE_CATEGORIES.ONBOARDING,
       role: isDriver ? 'driver' : 'passenger',
-      registrationMode: name === 'driverRegister' ? 'register' : 'login',
+      registrationMode: name === 'driverRegister' || name === 'driverRegisterVerifyOtp'
+        ? 'register'
+        : name === 'driverLogin'
+          ? 'login'
+          : null,
       screen: screenByName[name],
       pathname: normalizedPath,
     }

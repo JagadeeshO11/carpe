@@ -21,7 +21,8 @@ import RouteNotFoundScreen from './screens/RouteNotFoundScreen'
 import FindRidesScreen from './screens/FindRidesScreen'
 import OfferRideScreen from './screens/OfferRideScreen'
 import LivePoolMapScreen from './screens/LivePoolMapScreen'
-import ProfileScreen from './screens/ProfileScreen'
+import DriverProfileScreen from './screens/DriverProfileScreen'
+import PassengerProfileScreen from './screens/PassengerProfileScreen'
 import AdminDashboard from './screens/AdminDashboard'
 
 const screenComponents = {
@@ -109,13 +110,13 @@ function App() {
     if (role !== 'passenger' && role !== 'driver') return
     setFlowError('')
     setFormData((previous) => ({ ...previous, selectedRole: role }))
-    navigate(formatAuthPath(role, role === 'driver' ? 'driverIntro' : 'login'))
+    navigate(formatAuthPath(role, 'login'))
   }
 
   const handleDriverIntroContinue = () => {
     setFlowError('')
-    setFormData((previous) => ({ ...previous, selectedRole: 'driver' }))
-    navigate(formatAuthPath('driver', 'login'))
+    setFormData((previous) => ({ ...previous, selectedRole: 'driver', registrationMode: 'register' }))
+    navigate(formatAuthPath('driver', 'register'))
   }
 
   const goNext = () => {
@@ -142,9 +143,10 @@ function App() {
       }
 
       setFlowError('')
-      // Both Login and Register share one OTP verification screen.
-      // Register no longer stops on a second mobile-number step.
-      navigate(formatAuthPath(formData.selectedRole, 'verifyOtp'))
+      // Login and Register share one OTP verification screen, but use
+      // distinct paths so the registration mode is preserved for drivers.
+      const otpScreen = isDriver && formData.registrationMode === 'register' ? 'registerVerifyOtp' : 'verifyOtp'
+      navigate(formatAuthPath(formData.selectedRole, otpScreen))
       return
     }
 
@@ -163,6 +165,14 @@ function App() {
       setAuthenticatedRole('passenger')
       try { window.sessionStorage.setItem('carpe:authenticated-role', 'passenger') } catch {}
       navigate(formatMainAppPath('passenger', 'find'))
+      return
+    }
+
+    if (currentScreen === 'verifyOtp' && isDriver && formData.registrationMode !== 'register') {
+      setFlowError('')
+      setAuthenticatedRole('driver')
+      try { window.sessionStorage.setItem('carpe:authenticated-role', 'driver') } catch {}
+      navigate(formatMainAppPath('driver', 'offer'))
       return
     }
 
@@ -217,17 +227,22 @@ function App() {
     }
 
     if (currentScreen === 'driverIntro') {
-      navigate('/')
+      navigate(formatAuthPath('driver', 'login'))
       return
     }
 
     if (currentScreen === 'welcome') {
-      navigate(formData.selectedRole === 'driver' ? formatAuthPath('driver', 'driverIntro') : '/')
+      navigate(formData.selectedRole === 'driver' && formData.registrationMode === 'register' ? formatAuthPath('driver', 'driverIntro') : '/')
       return
     }
 
     if (currentScreen === 'verifyOtp' && formData.selectedRole === 'passenger') {
       navigate(formatAuthPath('passenger', 'login'))
+      return
+    }
+
+    if (currentScreen === 'verifyOtp' && formData.selectedRole === 'driver') {
+      navigate(formatAuthPath('driver', formData.registrationMode === 'register' ? 'register' : 'login'))
       return
     }
 
@@ -251,7 +266,7 @@ function App() {
   const setRegistrationMode = (registrationMode) => {
     updateField('registrationMode', registrationMode)
     if (formData.selectedRole === 'driver') {
-      navigate(formatAuthPath('driver', registrationMode))
+      navigate(formatAuthPath('driver', registrationMode === 'register' ? 'driverIntro' : 'login'))
     }
   }
 
@@ -329,11 +344,19 @@ function App() {
           {activeTab === 'live' && <LivePoolMapScreen bookings={bookings} />}
           {activeTab === 'admin' && <AdminDashboard />}
           {activeTab === 'profile' && (
-            <ProfileScreen
+            appMode === 'driver' ? (
+            <DriverProfileScreen
               formData={formData}
               onGoToOnboarding={() => navigate(formatAuthPath(appMode, 'login'))}
               onEmergencySos={() => {}}
             />
+            ) : (
+            <PassengerProfileScreen
+              formData={formData}
+              onGoToOnboarding={() => navigate(formatAuthPath(appMode, 'login'))}
+              onEmergencySos={() => {}}
+            />
+            )
           )}
         </MainAppShell>
       </MobileShell>

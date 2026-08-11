@@ -15,12 +15,12 @@ export default function DriverIntroScreen({ onBack, onNext }) {
       currentStep={null}
       onBack={onBack}
       onAction={onNext}
-      actionLabel="Continue to Driver Login"
+      actionLabel="Continue to Driver Registration"
       showProgress={false}
       className="driver-intro-screen"
     >
       <div className="driver-intro">
-        <div className="driver-intro__badge"><Car aria-hidden="true" size={38} strokeWidth={1.9} /><span>DRIVE &amp; SHARE</span></div>
+        <div className="driver-intro__badge"><Car aria-hidden="true" size={38} strokeWidth={1.9} /><span>DRIVE & SHARE</span></div>
         <h2>Earn while you drive.</h2>
         <p className="driver-intro__body">Offer safe, reliable seats on your route and make every journey count.</p>
         <div className="driver-intro__highlight"><ShieldCheck aria-hidden="true" size={20} strokeWidth={2.1} /> 0% commission on your first 5 rides.</div>
