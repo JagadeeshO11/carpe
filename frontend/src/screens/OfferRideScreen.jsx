@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Car, MapPin, CheckCircle2 } from 'lucide-react'
+import { Car, MapPin, CheckCircle2, Trash2, Plus } from 'lucide-react'
 import PrimaryButton from '../components/PrimaryButton'
 import SeatMap from '../components/SeatMap'
 import { SEAT_LAYOUTS } from '../data/carpoolData'
@@ -26,6 +26,7 @@ export default function OfferRideScreen({ formData, onPublishRide }) {
   const [seats, setSeats] = useState(3)
   const [price, setPrice] = useState(350)
   const [published, setPublished] = useState(false)
+  const [newStop, setNewStop] = useState('')
   const vehicleType = formData.vehicleType || 'suv'
   const defaultAvailable = (SEAT_LAYOUTS[vehicleType] || SEAT_LAYOUTS.sedan).filter(s => s.bookable).map(s => s.id)
   const [seatAvailability, setSeatAvailability] = useState(defaultAvailable)
@@ -40,6 +41,17 @@ export default function OfferRideScreen({ formData, onPublishRide }) {
 
   const updateArrivalStop = (index, value) => {
     setArrivalStops((previous) => previous.map((stop, idx) => idx === index ? value : stop))
+  }
+
+  const handleAddStop = () => {
+    const trimmed = newStop.trim()
+    if (!trimmed) return
+    setDepartureStops((previous) => [...previous, trimmed])
+    setNewStop('')
+  }
+
+  const handleRemoveStop = (index) => {
+    setDepartureStops((previous) => previous.filter((_, idx) => idx !== index))
   }
 
   const handlePublish = () => {
@@ -156,7 +168,7 @@ export default function OfferRideScreen({ formData, onPublishRide }) {
               </label>
               
               <div className="space-y-1.5 mb-2">
-                {stops.map((stop, idx) => (
+                {departureStops.map((stop, idx) => (
                   <div key={idx} className="flex items-center justify-between rounded-md bg-brand-lavender px-2.5 py-1 text-[10px] text-[#312b35]">
                     <span>📍 Stop {idx + 1}: {stop}</span>
                     <button type="button" onClick={() => handleRemoveStop(idx)} className="text-rose-500 hover:text-rose-700">
