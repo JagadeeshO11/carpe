@@ -27,6 +27,7 @@ export default function OfferRideScreen({ formData, onPublishRide }) {
   const [price, setPrice] = useState(350)
   const [published, setPublished] = useState(false)
   const [newStop, setNewStop] = useState('')
+  const [newDropStop, setNewDropStop] = useState('')
   const vehicleType = formData.vehicleType || 'suv'
   const defaultAvailable = (SEAT_LAYOUTS[vehicleType] || SEAT_LAYOUTS.sedan).filter(s => s.bookable).map(s => s.id)
   const [seatAvailability, setSeatAvailability] = useState(defaultAvailable)
@@ -52,6 +53,17 @@ export default function OfferRideScreen({ formData, onPublishRide }) {
 
   const handleRemoveStop = (index) => {
     setDepartureStops((previous) => previous.filter((_, idx) => idx !== index))
+  }
+
+  const handleAddDropStop = () => {
+    const trimmed = newDropStop.trim()
+    if (!trimmed) return
+    setArrivalStops((previous) => [...previous, trimmed])
+    setNewDropStop('')
+  }
+
+  const handleRemoveDropStop = (index) => {
+    setArrivalStops((previous) => previous.filter((_, idx) => idx !== index))
   }
 
   const handlePublish = () => {
@@ -189,6 +201,41 @@ export default function OfferRideScreen({ formData, onPublishRide }) {
                 <button
                   type="button"
                   onClick={handleAddStop}
+                  className="flex items-center gap-1 rounded-control bg-brand-lavender-strong px-3 text-[10px] font-bold text-brand-purple"
+                >
+                  <Plus size={12} /> Add
+                </button>
+              </div>
+            </div>
+
+            {/* Drop Stops */}
+            <div className="mt-3">
+              <label className="block text-[10px] font-semibold text-[#5f5965] mb-1">
+                On-the-way Drop Stops
+              </label>
+
+              <div className="space-y-1.5 mb-2">
+                {arrivalStops.map((stop, idx) => (
+                  <div key={idx} className="flex items-center justify-between rounded-md bg-brand-lavender px-2.5 py-1 text-[10px] text-[#312b35]">
+                    <span>📍 Drop {idx + 1}: {stop}</span>
+                    <button type="button" onClick={() => handleRemoveDropStop(idx)} className="text-rose-500 hover:text-rose-700">
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Add drop stop (e.g. Mysuru Ring Road)"
+                  value={newDropStop}
+                  onChange={(e) => setNewDropStop(e.target.value)}
+                  className="flex-1 rounded-control border border-brand-border bg-white px-3 py-1.5 text-[10px] focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddDropStop}
                   className="flex items-center gap-1 rounded-control bg-brand-lavender-strong px-3 text-[10px] font-bold text-brand-purple"
                 >
                   <Plus size={12} /> Add

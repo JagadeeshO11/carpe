@@ -21,6 +21,7 @@ import RouteNotFoundScreen from './screens/RouteNotFoundScreen'
 import FindRidesScreen from './screens/FindRidesScreen'
 import OfferRideScreen from './screens/OfferRideScreen'
 import LivePoolMapScreen from './screens/LivePoolMapScreen'
+import PassengerLivePoolScreen from './screens/PassengerLivePoolScreen'
 import DriverProfileScreen from './screens/DriverProfileScreen'
 import PassengerProfileScreen from './screens/PassengerProfileScreen'
 import AdminDashboard from './screens/AdminDashboard'
@@ -341,7 +342,13 @@ function App() {
             />
           )}
           {activeTab === 'offer' && <OfferRideScreen formData={formData} onPublishRide={handlePublishRide} />}
-          {activeTab === 'live' && <LivePoolMapScreen bookings={bookings} />}
+          {activeTab === 'live' && (
+            appMode === 'driver' ? (
+              <LivePoolMapScreen bookings={bookings} />
+            ) : (
+              <PassengerLivePoolScreen bookings={bookings} rides={rides} />
+            )
+          )}
           {activeTab === 'admin' && <AdminDashboard />}
           {activeTab === 'profile' && (
             appMode === 'driver' ? (
