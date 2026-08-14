@@ -106,6 +106,7 @@ export const PASSENGER_CONDUCT_RULES = Object.freeze([
 export const createInitialFormState = () => ({
   selectedRole: null,
   registrationMode: 'login',
+  authMethod: 'phone',
   phone: '',
   otp: ['', '', '', '', '', ''],
   aadhaarNumber: '',

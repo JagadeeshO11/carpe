@@ -365,6 +365,17 @@
 .auth-panel__note { display: flex; align-items: flex-start; gap: 7px; margin: 17px 0 0; color: var(--registration-muted-strong); font-size: 13px; line-height: 1.45; }
 .auth-panel__note svg { flex-shrink: 0; margin-top: 1px; color: var(--color-brand-green); }
 .auth-panel__route-hint { margin-top: 18px; font-size: 12px; }
+.auth-panel__social { margin-top: 19px; }
+.auth-panel__divider { display: flex; align-items: center; gap: 12px; color: var(--registration-muted); font-size: 12px; font-weight: 700; text-align: center; }
+.auth-panel__divider::before, .auth-panel__divider::after { height: 1px; flex: 1; background: var(--registration-border); content: ''; }
+.auth-panel__social-buttons { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+.auth-panel__provider { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; gap: 9px; border: 1px solid var(--registration-border-strong); border-radius: 15px; background: var(--registration-surface); color: var(--registration-ink); font-size: 13px; font-weight: 800; transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease; }
+.auth-panel__provider:hover, .auth-panel__provider:focus-visible { border-color: var(--color-brand-purple); box-shadow: 0 4px 12px rgb(91 22 166 / 0.12); outline: none; transform: translateY(-1px); }
+.auth-panel__provider-mark { display: inline-flex; width: 21px; height: 21px; align-items: center; justify-content: center; border-radius: 50%; font-family: Arial, sans-serif; font-size: 15px; font-weight: 900; line-height: 1; }
+.auth-panel__provider--google .auth-panel__provider-mark { color: #fff; background: conic-gradient(from -45deg, #4285f4 0 25%, #34a853 0 50%, #fbbc05 0 75%, #ea4335 0); }
+.auth-panel__provider--facebook .auth-panel__provider-mark { background: #1877f2; color: #fff; font-family: Arial, sans-serif; font-size: 19px; align-items: flex-end; }
+.auth-panel__provider--email svg { color: var(--color-brand-purple); }
+.auth-panel__social-note { margin: 11px 0 0; color: var(--registration-muted); font-size: 11px; line-height: 1.45; text-align: center; }
 .auth-panel__switch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; margin: 0 0 17px; border: 1px solid var(--registration-border); border-radius: 18px; background: var(--registration-soft); padding: 5px; }
 .auth-panel__switch-button { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 7px; border: 0; border-radius: 14px; background: transparent; color: var(--registration-muted-strong); font-size: 14px; font-weight: 800; }
 .auth-panel__switch-button--active { background: var(--color-brand-purple); color: #fff; box-shadow: 0 5px 12px rgb(91 22 166 / 0.18); }

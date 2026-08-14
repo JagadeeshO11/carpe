@@ -6,6 +6,7 @@ export default function VerifyOtpScreen({ formData, onBack, onNext, onOtpChange,
   const inputRefs = useRef([])
   const isDriver = formData.selectedRole === 'driver'
   const isDriverRegistering = isDriver && formData.registrationMode === 'register'
+  const isEmailAuth = formData.authMethod === 'email' && !isDriverRegistering
 
   const handleChange = (index, value) => {
     const digit = value.replace(/\D/g, '').slice(-1)
@@ -20,7 +21,7 @@ export default function VerifyOtpScreen({ formData, onBack, onNext, onOtpChange,
   return (
     <RegistrationLayout
       title={isDriver && !isDriverRegistering ? 'Driver sign in OTP' : 'Verify OTP'}
-      subtitle={isDriverRegistering ? 'Step 1: Mobile & OTP Verification' : 'Confirm your mobile number to continue.'}
+      subtitle={isDriverRegistering ? 'Step 1: Mobile & OTP Verification' : isEmailAuth ? 'Confirm your email address to continue.' : 'Confirm your mobile number to continue.'}
       currentStep="mobileOtp"
       showProgress={isDriverRegistering}
       onBack={onBack}
@@ -33,7 +34,7 @@ export default function VerifyOtpScreen({ formData, onBack, onNext, onOtpChange,
           <ShieldCheck aria-hidden="true" size={42} strokeWidth={2.1} />
         </div>
         <h2 className="registration-card__title">Enter OTP</h2>
-        <p className="registration-card__body">We&apos;ve sent a 6-digit OTP to<br /><strong>{formData.phone ? `+91 ${formData.phone}` : '+91 mobile number'}</strong></p>
+        <p className="registration-card__body">We&apos;ve sent a 6-digit OTP to<br /><strong>{isEmailAuth ? (formData.email || 'your email address') : (formData.phone ? `+91 ${formData.phone}` : '+91 mobile number')}</strong></p>
         <div className="registration-otp-grid" role="group" aria-label="One-time password">
           {formData.otp.map((digit, index) => (
             <input

@@ -126,6 +126,7 @@ function App() {
     const otpComplete = formData.otp.every(Boolean)
     const aadhaarDigits = formData.aadhaarNumber.replace(/\D/g, '')
     const emailIsValid = !formData.email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+    const isEmailAuth = formData.authMethod === 'email' && !(isDriver && formData.registrationMode === 'register')
 
     if (currentScreen === 'roleSelect') {
       handleRoleSelect(formData.selectedRole || 'passenger')
@@ -138,8 +139,8 @@ function App() {
     }
 
     if (currentScreen === 'welcome') {
-      if (phoneDigits.length !== 10) {
-        setFlowError('Enter a valid 10-digit mobile number to continue.')
+      if (isEmailAuth ? !formData.email || !emailIsValid : phoneDigits.length !== 10) {
+        setFlowError(isEmailAuth ? 'Enter a valid email address to continue.' : 'Enter a valid 10-digit mobile number to continue.')
         return
       }
 
@@ -265,10 +266,28 @@ function App() {
   }
 
   const setRegistrationMode = (registrationMode) => {
-    updateField('registrationMode', registrationMode)
+    setFormData((previous) => ({ ...previous, registrationMode, authMethod: 'phone' }))
+    setFlowError('')
     if (formData.selectedRole === 'driver') {
       navigate(formatAuthPath('driver', registrationMode === 'register' ? 'driverIntro' : 'login'))
     }
+  }
+
+  const useEmailAuthentication = () => {
+    setFlowError('')
+    setFormData((previous) => ({ ...previous, authMethod: 'email', otp: ['', '', '', '', '', ''] }))
+  }
+
+  const handleSocialSignIn = (provider) => {
+    const role = formData.selectedRole === 'driver' ? 'driver' : 'passenger'
+    setFlowError('')
+    setFormData((previous) => ({ ...previous, socialProvider: provider }))
+    setAuthenticatedRole(role)
+    try {
+      window.sessionStorage.setItem('carpe:authenticated-role', role)
+      window.sessionStorage.setItem('carpe:social-provider', provider)
+    } catch {}
+    navigate(formatMainAppPath(role, role === 'driver' ? 'offer' : 'find'))
   }
 
   const updateOtp = (index, value) => {
@@ -385,6 +404,8 @@ function App() {
         onSelectRole={handleRoleSelect}
         onFieldChange={updateField}
         onRegistrationModeChange={setRegistrationMode}
+        onSocialSignIn={handleSocialSignIn}
+        onUseEmail={useEmailAuthentication}
         onOtpChange={updateOtp}
         error={flowError}
         onComplete={goNext}
