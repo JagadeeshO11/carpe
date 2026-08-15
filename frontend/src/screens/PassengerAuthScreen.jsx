@@ -9,8 +9,8 @@ export default function PassengerAuthScreen({ formData, onBack, onNext, onFieldC
       subtitle={isEmailAuth ? 'Sign in securely with your email address.' : 'Sign in securely with your mobile number.'}
       showProgress={false}
       onBack={onBack}
-      actionLabel={isEmailAuth ? 'Send email OTP' : 'Send OTP'}
-      onAction={onNext}
+      actionLabel={isEmailAuth ? 'Send email OTP' : undefined}
+      onAction={isEmailAuth ? onNext : undefined}
       actionHint={error}
       className="auth-panel auth-panel--passenger"
     >
@@ -26,11 +26,16 @@ export default function PassengerAuthScreen({ formData, onBack, onNext, onFieldC
             <Mail aria-hidden="true" size={21} />
             <input id="passenger-auth" type="email" autoComplete="email" value={formData.email} onChange={(event) => onFieldChange('email', event.target.value)} placeholder="you@example.com" />
           </div>
-        ) : <div className="registration-phone-field">
-          <span className="registration-country-code">+91</span>
-          <Phone aria-hidden="true" size={22} className="auth-panel__field-icon" />
-          <input id="passenger-auth" type="tel" inputMode="numeric" autoComplete="tel" value={formData.phone} onChange={(event) => onFieldChange('phone', event.target.value)} placeholder="Enter 10-digit mobile number" className="registration-input" />
-        </div>}
+        ) : (
+          <>
+            <div className="registration-phone-field">
+              <span className="registration-country-code">+91</span>
+              <Phone aria-hidden="true" size={22} className="auth-panel__field-icon" />
+              <input id="passenger-auth" type="tel" inputMode="numeric" autoComplete="tel" value={formData.phone} onChange={(event) => onFieldChange('phone', event.target.value)} placeholder="Enter 10-digit mobile number" className="registration-input" />
+            </div>
+            <button type="button" className="auth-panel__otp-action" onClick={onNext}>Send OTP</button>
+          </>
+        )}
         {error && <p className="registration-error registration-error--left" role="alert">{error}</p>}
         <p className="auth-panel__note"><ShieldCheck aria-hidden="true" size={16} /> We will send a one-time password to verify your account.</p>
       </div>
@@ -39,9 +44,6 @@ export default function PassengerAuthScreen({ formData, onBack, onNext, onFieldC
         <div className="auth-panel__social-buttons">
           <button type="button" className="auth-panel__provider auth-panel__provider--google" onClick={() => onSocialSignIn('google')}>
             <span className="auth-panel__provider-mark" aria-hidden="true">G</span> Google
-          </button>
-          <button type="button" className="auth-panel__provider auth-panel__provider--facebook" onClick={() => onSocialSignIn('facebook')}>
-            <span className="auth-panel__provider-mark" aria-hidden="true">f</span> Facebook
           </button>
           <button type="button" className="auth-panel__provider auth-panel__provider--email" onClick={onUseEmail}>
             <Mail aria-hidden="true" size={18} /> Email
