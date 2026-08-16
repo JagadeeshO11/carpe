@@ -1,57 +1,22 @@
-import { Mail, Phone, ShieldCheck, UsersRound } from 'lucide-react'
+import { Mail, Phone, ShieldCheck, UsersRound, LogIn, UserPlus } from 'lucide-react'
 import RegistrationLayout from '../components/RegistrationLayout'
 
-export default function PassengerAuthScreen({ formData, onBack, onNext, onFieldChange, onSocialSignIn, onUseEmail, error }) {
-  const isEmailAuth = formData.authMethod === 'email'
+export default function PassengerAuthScreen({ formData, onBack, onNext, onFieldChange, onSocialSignIn, onUseEmail, onRegistrationModeChange, error }) {
+  const isRegistering = formData.registrationMode === 'register'
+  const isEmailAuth = !isRegistering && formData.authMethod === 'email'
   return (
-    <RegistrationLayout
-      title="Find your next shared ride"
-      subtitle={isEmailAuth ? 'Sign in securely with your email address.' : 'Sign in securely with your mobile number.'}
-      showProgress={false}
-      onBack={onBack}
-      actionLabel={isEmailAuth ? 'Send email OTP' : undefined}
-      onAction={isEmailAuth ? onNext : undefined}
-      actionHint={error}
-      className="auth-panel auth-panel--passenger"
-    >
-      <div className="auth-panel__hero">
-        <span className="auth-panel__icon"><UsersRound aria-hidden="true" size={35} /></span>
-        <h2>Passenger access</h2>
-        <p>Verify your number to browse and book rides.</p>
-      </div>
+    <RegistrationLayout title={isRegistering ? 'Create your passenger account' : 'Find your next shared ride'} subtitle={isRegistering ? 'Enter your name and mobile number to get started.' : isEmailAuth ? 'Sign in securely with your email address.' : 'Sign in securely with your mobile number.'} showProgress={false} onBack={onBack} actionLabel={isEmailAuth ? 'Send email OTP' : undefined} onAction={isEmailAuth ? onNext : undefined} actionHint={error} className="auth-panel auth-panel--passenger">
+      <div className="auth-panel__hero"><span className="auth-panel__icon"><UsersRound aria-hidden="true" size={35} /></span><h2>Passenger access</h2><p>{isRegistering ? 'Create your account to find and book trusted rides.' : 'Verify your number to browse and book rides.'}</p></div>
+      <div className="auth-panel__switch" role="tablist" aria-label="Passenger authentication"><button type="button" role="tab" aria-selected={!isRegistering} onClick={() => onRegistrationModeChange('login')} className={!isRegistering ? 'auth-panel__switch-button auth-panel__switch-button--active' : 'auth-panel__switch-button'}><LogIn size={17} /> Sign in</button><button type="button" role="tab" aria-selected={isRegistering} onClick={() => onRegistrationModeChange('register')} className={isRegistering ? 'auth-panel__switch-button auth-panel__switch-button--active' : 'auth-panel__switch-button'}><UserPlus size={17} /> Sign up</button></div>
       <div className="auth-panel__card">
+        {isRegistering && <><label htmlFor="passenger-name" className="registration-field-label registration-field-label--left">Full Name</label><div className="auth-panel__input-with-icon"><UsersRound aria-hidden="true" size={21} /><input id="passenger-name" type="text" autoComplete="name" value={formData.fullName} onChange={(event) => onFieldChange('fullName', event.target.value)} placeholder="Enter your full name" /></div></>}
         <label htmlFor="passenger-auth" className="registration-field-label registration-field-label--left">{isEmailAuth ? 'Email address' : 'Mobile number'}</label>
-        {isEmailAuth ? (
-          <div className="auth-panel__input-with-icon">
-            <Mail aria-hidden="true" size={21} />
-            <input id="passenger-auth" type="email" autoComplete="email" value={formData.email} onChange={(event) => onFieldChange('email', event.target.value)} placeholder="you@example.com" />
-          </div>
-        ) : (
-          <>
-            <div className="registration-phone-field">
-              <span className="registration-country-code">+91</span>
-              <Phone aria-hidden="true" size={22} className="auth-panel__field-icon" />
-              <input id="passenger-auth" type="tel" inputMode="numeric" autoComplete="tel" value={formData.phone} onChange={(event) => onFieldChange('phone', event.target.value)} placeholder="Enter 10-digit mobile number" className="registration-input" />
-            </div>
-            <button type="button" className="auth-panel__otp-action" onClick={onNext}>Send OTP</button>
-          </>
-        )}
+        {isEmailAuth ? <div className="auth-panel__input-with-icon"><Mail aria-hidden="true" size={21} /><input id="passenger-auth" type="email" autoComplete="email" value={formData.email} onChange={(event) => onFieldChange('email', event.target.value)} placeholder="you@example.com" /></div> : <><div className="registration-phone-field"><span className="registration-country-code">+91</span><Phone aria-hidden="true" size={22} className="auth-panel__field-icon" /><input id="passenger-auth" type="tel" inputMode="numeric" autoComplete="tel" value={formData.phone} onChange={(event) => onFieldChange('phone', event.target.value)} placeholder="Enter 10-digit mobile number" className="registration-input" /></div><button type="button" className="auth-panel__otp-action" onClick={onNext}>{isRegistering ? 'Continue to OTP' : 'Send OTP'}</button></>}
         {error && <p className="registration-error registration-error--left" role="alert">{error}</p>}
-        <p className="auth-panel__note"><ShieldCheck aria-hidden="true" size={16} /> We will send a one-time password to verify your account.</p>
+        <p className="auth-panel__note"><ShieldCheck aria-hidden="true" size={16} /> {isRegistering ? 'Your name and mobile number are used to create your passenger profile.' : 'We will send a one-time password to verify your account.'}</p>
       </div>
-      <div className="auth-panel__social" aria-label="Other sign-in options">
-        <div className="auth-panel__divider"><span>or continue with</span></div>
-        <div className="auth-panel__social-buttons">
-          <button type="button" className="auth-panel__provider auth-panel__provider--google" onClick={() => onSocialSignIn('google')}>
-            <span className="auth-panel__provider-mark" aria-hidden="true">G</span> Google
-          </button>
-          <button type="button" className="auth-panel__provider auth-panel__provider--email" onClick={onUseEmail}>
-            <Mail aria-hidden="true" size={18} /> Email
-          </button>
-        </div>
-        <p className="auth-panel__social-note">Your social account is only used to sign you in securely.</p>
-      </div>
-      <p className="auth-panel__route-hint">Already a passenger? Use the same number to continue.</p>
+      {!isRegistering && <div className="auth-panel__social" aria-label="Other sign-in options"><div className="auth-panel__divider"><span>or continue with</span></div><div className="auth-panel__social-buttons"><button type="button" className="auth-panel__provider auth-panel__provider--google" onClick={() => onSocialSignIn('google')}><span className="auth-panel__provider-mark" aria-hidden="true">G</span> Google</button><button type="button" className="auth-panel__provider auth-panel__provider--email" onClick={onUseEmail}><Mail aria-hidden="true" size={18} /> Email</button></div><p className="auth-panel__social-note">Your social account is only used to sign you in securely.</p></div>}
+      {!isRegistering && <p className="auth-panel__route-hint">Already a passenger? Use the same number to continue.</p>}
     </RegistrationLayout>
   )
 }
