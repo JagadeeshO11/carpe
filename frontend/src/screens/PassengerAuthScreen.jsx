@@ -1,7 +1,7 @@
 import { Mail, Phone, ShieldCheck, UsersRound, LogIn, UserPlus } from 'lucide-react'
 import RegistrationLayout from '../components/RegistrationLayout'
 
-export default function PassengerAuthScreen({ formData, onBack, onNext, onFieldChange, onSocialSignIn, onUseEmail, onRegistrationModeChange, error }) {
+export default function PassengerAuthScreen({ formData, onBack, onNext, onSocialSignIn, onUseEmail, onFieldChange, onRegistrationModeChange, error }) {
   const isRegistering = formData.registrationMode === 'register'
   const isEmailAuth = !isRegistering && formData.authMethod === 'email'
   return (
@@ -15,6 +15,7 @@ export default function PassengerAuthScreen({ formData, onBack, onNext, onFieldC
         {error && <p className="registration-error registration-error--left" role="alert">{error}</p>}
         <p className="auth-panel__note"><ShieldCheck aria-hidden="true" size={16} /> {isRegistering ? 'Your name and mobile number are used to create your passenger profile.' : 'We will send a one-time password to verify your account.'}</p>
       </div>
+      {isRegistering && <div className="auth-panel__social" aria-label="Other sign-up options"><div className="auth-panel__divider"><span>or sign up with</span></div><div className="auth-panel__social-buttons"><button type="button" className="auth-panel__provider auth-panel__provider--google" onClick={() => onSocialSignIn('google')}><span className="auth-panel__provider-mark" aria-hidden="true">G</span> Google</button><button type="button" className="auth-panel__provider auth-panel__provider--email" onClick={onUseEmail}><Mail aria-hidden="true" size={18} /> Email</button></div><p className="auth-panel__social-note">Your account is securely connected using Google or email.</p></div>}
       {!isRegistering && <div className="auth-panel__social" aria-label="Other sign-in options"><div className="auth-panel__divider"><span>or continue with</span></div><div className="auth-panel__social-buttons"><button type="button" className="auth-panel__provider auth-panel__provider--google" onClick={() => onSocialSignIn('google')}><span className="auth-panel__provider-mark" aria-hidden="true">G</span> Google</button><button type="button" className="auth-panel__provider auth-panel__provider--email" onClick={onUseEmail}><Mail aria-hidden="true" size={18} /> Email</button></div><p className="auth-panel__social-note">Your social account is only used to sign you in securely.</p></div>}
       {!isRegistering && <p className="auth-panel__route-hint">Already a passenger? Use the same number to continue.</p>}
     </RegistrationLayout>
